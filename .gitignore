@@ -1,0 +1,27 @@
+# Bỏ qua dữ liệu thô và ảnh
+data/
+output/
+output_test/
+model_weights/
+scratch/
+
+# Bỏ qua các định dạng Big Data
+*.npy
+*.pkl
+*.pyth
+*.log
+*.exe
+*.idx
+*.pt
+*.pth
+
+# Bỏ qua thư mục đệm Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Bỏ qua cấu hình môi trường
+.env
+venv/
+env/
