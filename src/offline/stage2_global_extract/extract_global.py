@@ -39,10 +39,17 @@ def extract_dataset(dataset_name, model, device):
         str(BASE_DIR), "google-research", "cann", f"{dataset_name}_database_names.txt"
     )
     
-    with open(q_list_path, "r") as f:
-        q_names = [line.strip() for line in f if line.strip()]
-    with open(db_list_path, "r") as f:
-        db_names = [line.strip() for line in f if line.strip()]
+    if os.path.exists(q_list_path):
+        with open(q_list_path, "r") as f:
+            q_names = [line.strip() for line in f if line.strip()]
+    else:
+        q_names = []
+        
+    if os.path.exists(db_list_path):
+        with open(db_list_path, "r") as f:
+            db_names = [line.strip() for line in f if line.strip()]
+    else:
+        db_names = [os.path.splitext(f)[0] for f in os.listdir(img_dir) if f.lower().endswith('.jpg')]
         
     transform = transforms.Compose([
         transforms.ToTensor(),
@@ -91,6 +98,11 @@ def extract_dataset(dataset_name, model, device):
         extract_image(db, out_dir_db, is_query=False)
 
 def main():
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--dataset', default="roxford5k", help='Dataset name')
+    args = parser.parse_args()
+    
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Using device: {device}")
     
@@ -120,8 +132,7 @@ def main():
     model = model.to(device)
     model.eval()
     
-    #extract_dataset("roxford5k", model, device)
-    extract_dataset("rparis6k", model, device)
+    extract_dataset(args.dataset, model, device)
 
 if __name__ == "__main__":
     main()
