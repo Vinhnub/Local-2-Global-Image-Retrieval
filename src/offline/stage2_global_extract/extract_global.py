@@ -11,7 +11,8 @@ BASE_DIR = ''
 sys.path.append(os.path.join(str(BASE_DIR), 'src', 'core', 'SuperGlobal-main'))
 
 from model.CVNet_Rerank_model import CVNet_Rerank
-
+sys.path.append(os.path.join(str(BASE_DIR), 'src'))
+from model.osnet_extractor import OSNetExtractor
 
 
 def extract_dataset(dataset_name, model, device):
@@ -80,7 +81,7 @@ def extract_dataset(dataset_name, model, device):
             
             with torch.no_grad():
                 feat = model.extract_global_descriptor(img_tensor, True, True, True, scale)
-                feat = feat.cpu().numpy().squeeze() # (2048,)
+                feat = feat.cpu().numpy().squeeze() 
                 
             np.save(os.path.join(out_dir, f"{img_name}.npy"), feat)
             print (f"Extracted {img_name} to {out_dir}")
@@ -101,33 +102,38 @@ def main():
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument('--dataset', default="roxford5k", help='Dataset name')
+    parser.add_argument('--global_model', default="cvnet", choices=['cvnet', 'osnet'], help='Global feature extractor')
     args = parser.parse_args()
     
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Using device: {device}")
     
-    # Initialize model
-    model = CVNet_Rerank(RESNET_DEPTH=101, REDUCTION_DIM=2048, relup=False)
-    
-    # Load weights
-    weight_path = BASE_DIR + "model_weights" + '/' + "CVPR2022_CVNet_R101.pyth"
-    print(f"Loading weights from {weight_path}...")
-    state_dict = torch.load(weight_path, map_location='cpu')
-    if 'model_state' in state_dict:
-        state_dict = state_dict['model_state']
-    
-    new_state_dict = {}
-    for k, v in state_dict.items():
-        if k.startswith('module.'):
-            new_state_dict[k[7:]] = v
-        else:
-            new_state_dict[k] = v
+    if args.global_model == "cvnet":
+        # Initialize model
+        model = CVNet_Rerank(RESNET_DEPTH=101, REDUCTION_DIM=2048, relup=False)
+        
+        # Load weights
+        weight_path = BASE_DIR + "model_weights" + '/' + "CVPR2022_CVNet_R101.pyth"
+        print(f"Loading weights from {weight_path}...")
+        state_dict = torch.load(weight_path, map_location='cpu')
+        if 'model_state' in state_dict:
+            state_dict = state_dict['model_state']
+        
+        new_state_dict = {}
+        for k, v in state_dict.items():
+            if k.startswith('module.'):
+                new_state_dict[k[7:]] = v
+            else:
+                new_state_dict[k] = v
+                
+        try:
+            model.load_state_dict(new_state_dict, strict=False)
+        except Exception as e:
+            print("Fallback: loading into encoder_q")
+            model.encoder_q.load_state_dict(new_state_dict, strict=False)
             
-    try:
-        model.load_state_dict(new_state_dict, strict=False)
-    except Exception as e:
-        print("Fallback: loading into encoder_q")
-        model.encoder_q.load_state_dict(new_state_dict, strict=False)
+    elif args.global_model == "osnet":
+        model = OSNetExtractor(model_name='osnet_x1_0', device=device)
         
     model = model.to(device)
     model.eval()

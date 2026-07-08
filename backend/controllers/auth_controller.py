@@ -12,7 +12,11 @@ class AuthController:
     def login_user(self, db: Session, form_data: OAuth2PasswordRequestForm):
         user = auth_service.authenticate_user(db, form_data.username, form_data.password)
         access_token = create_access_token(data={"sub": user.username})
-        return {"access_token": access_token, "token_type": "bearer"}
+        return {
+            "access_token": access_token, 
+            "token_type": "bearer",
+            "user": user
+        }
 
     def change_password(self, db: Session, current_user: User, data: ChangePasswordRequest):
         return auth_service.change_password(db, current_user, data)

@@ -24,7 +24,7 @@ class HistoryController:
             raise HTTPException(status_code=403, detail="Không có quyền truy cập query này")
             
         results = []
-        dataset_name = "roxford5k" # Mặc định theo code cũ, có thể lưu dataset vào QueryHistory nếu sau này mở rộng
+        dataset_name = "worldcup2026_low" # Mặc định theo dataset hiện tại của bạn
         
         for result in query.results:
             img_name = result.result_image_id

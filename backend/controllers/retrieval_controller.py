@@ -5,6 +5,9 @@ from backend.services.retrieval_service import retrieval_service
 from backend.models.schemas import RetrievalResponse
 from backend.models.domain import User, QueryHistory
 
+NUM_QUERY_FOR_PRO = 30
+NUM_QUERY_FOR_FREE = 10
+
 class RetrievalController:
     async def handle_retrieval(self, file: UploadFile, dataset: str, db: Session, current_user: User) -> RetrievalResponse:
         if not file.content_type.startswith("image/"):
@@ -15,8 +18,8 @@ class RetrievalController:
         if is_pro and current_user.pro_expire_date and current_user.pro_expire_date < datetime.utcnow():
             is_pro = False # Hết hạn Pro
             
-        top_k = 30 if is_pro else 10
-        max_queries_per_day = 30 if is_pro else 10
+        top_k = NUM_QUERY_FOR_PRO if is_pro else NUM_QUERY_FOR_FREE
+        max_queries_per_day = 1000000 if is_pro else NUM_QUERY_FOR_FREE
         # Đếm số query trong ngày hôm nay
         today = datetime.utcnow().date()
         start_of_day = datetime(today.year, today.month, today.day)

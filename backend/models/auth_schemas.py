@@ -11,6 +11,7 @@ class UserResponse(BaseModel):
     username: str
     is_pro: bool
     pro_expire_date: Optional[datetime] = None
+    created_at: Optional[datetime] = None
     
     class Config:
         from_attributes = True
@@ -18,6 +19,7 @@ class UserResponse(BaseModel):
 class Token(BaseModel):
     access_token: str
     token_type: str
+    user: UserResponse
 
 class ChangePasswordRequest(BaseModel):
     old_password: str

@@ -35,12 +35,12 @@ try:
 except ImportError as e:
     print(f"Warning: Không thể import một số thư viện deep learning ({e}). Hãy đảm bảo bạn đã cài đủ requirements.")
 
-
 class RetrievalService:
     def __init__(self):
         # Thiết lập biến khởi tạo
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        self.dataset_name = "roxford5k"
+        self.dataset_name = "worldcup2026_low"  # Mặc định sử dụng worldcup2026_low
+        self.global_model_name = "osnet" # cvnet or osnet
         self.imlist = []
         # Removed self._load_models_and_databases() here to prevent double loading
         # It will be called via FastAPI lifespan instead.
@@ -82,20 +82,26 @@ class RetrievalService:
         else:
             print("  -> Warning: FIRe model không tồn tại tại", fire_model_path)
 
-        # 2. INIT CVNet (Global Features)
-        print("[2/4] Loading CVNet Model (Global)...")
-        cvnet_weight_path = BASE_DIR / "model_weights" / "CVPR2022_CVNet_R101.pyth"
-        if cvnet_weight_path.exists():
-            self.cvnet_net = CVNet_Rerank(RESNET_DEPTH=101, REDUCTION_DIM=2048, relup=False)
-            cvnet_state = torch.load(cvnet_weight_path, map_location='cpu')
-            if 'model_state' in cvnet_state:
-                cvnet_state = cvnet_state['model_state']
-            new_state_dict = {k[7:] if k.startswith('module.') else k: v for k, v in cvnet_state.items()}
-            self.cvnet_net.load_state_dict(new_state_dict, strict=False)
-            self.cvnet_net.to(self.device)
-            self.cvnet_net.eval()
-        else:
-            print("  -> Warning: CVNet model không tồn tại tại", cvnet_weight_path)
+        # 2. INIT Global Features Extractor
+        print(f"[2/4] Loading Global Model ({self.global_model_name})...")
+        if self.global_model_name == "cvnet":
+            cvnet_weight_path = BASE_DIR / "model_weights" / "CVPR2022_CVNet_R101.pyth"
+            if cvnet_weight_path.exists():
+                self.global_net = CVNet_Rerank(RESNET_DEPTH=101, REDUCTION_DIM=2048, relup=False)
+                cvnet_state = torch.load(cvnet_weight_path, map_location='cpu')
+                if 'model_state' in cvnet_state:
+                    cvnet_state = cvnet_state['model_state']
+                new_state_dict = {k[7:] if k.startswith('module.') else k: v for k, v in cvnet_state.items()}
+                self.global_net.load_state_dict(new_state_dict, strict=False)
+                self.global_net.to(self.device)
+                self.global_net.eval()
+            else:
+                print("  -> Warning: CVNet model không tồn tại tại", cvnet_weight_path)
+        elif self.global_model_name == "osnet":
+            from src.model.osnet_extractor import OSNetExtractor
+            self.global_net = OSNetExtractor(model_name='osnet_x1_0', device=self.device)
+            self.global_net.to(self.device)
+            self.global_net.eval()
 
         # 3. INIT Database (Local & Global Features)
         print(f"[3/4] Loading Database Features for dataset: {self.dataset_name}...")
@@ -117,10 +123,11 @@ class RetrievalService:
                 self.db_local_feats.append(l_feat)
                 
                 # Load Global feat (chuẩn hoá sẵn để truy vấn nhanh hơn)
+                dim = 512 if self.global_model_name == "osnet" else 2048
                 global_feat_path = BASE_DIR / "output" / "stage2" / "features" / self.dataset_name / "database" / f"{img}.npy"
-                glob = np.load(global_feat_path) if os.path.exists(global_feat_path) else np.zeros(2048)
+                glob = np.load(global_feat_path) if os.path.exists(global_feat_path) else np.zeros(dim)
                 n = np.linalg.norm(glob)
-                self.db_global_feats[img] = glob / n if n > 1e-6 else np.zeros(2048)
+                self.db_global_feats[img] = glob / n if n > 1e-6 else np.zeros(dim)
         else:
              print("  -> Warning: File danh sách database không tồn tại:", db_list_path)
 
@@ -168,10 +175,55 @@ class RetrievalService:
         # ==============================================================================
         
         import base64
+        from PIL import Image
+        
         mock_results = []
         if self.imlist:
-            for i in range(min(top_k, len(self.imlist))):
-                img_name = self.imlist[i]
+            # --- START REAL-TIME SEARCH ENGINE PIPELINE ---
+            from src.online.stage5_test_query.test_query import run_search_pipeline
+            
+            k_candidates = min(1600, len(self.imlist))
+            M_sg = min(1600, len(self.imlist))
+            w_local = 0.19
+            w_global = 0.81
+            k_sg = 6
+            beta_sg = 0.31
+            backend = "pytorch"
+            k_candidates_local = min(700, len(self.imlist))
+
+            t_start = time.time()
+            img = Image.open(file_location).convert('RGB')
+            img_tensor_fire = self.fire_transform(img).unsqueeze(0).to(self.device)
+            
+            def get_global_feat(img_name):
+                dim = 512 if self.global_model_name == "osnet" else 2048
+                return self.db_global_feats.get(img_name, np.zeros(dim))
+                
+            top_k_names = run_search_pipeline(
+                img_tensor_fire=img_tensor_fire,
+                fire_net=self.fire_net,
+                global_net=self.global_net,
+                db_local_feats=self.db_local_feats,
+                get_global_feat=get_global_feat,
+                sparse_distances=self.sparse_distances,
+                imlist=self.imlist,
+                device=self.device,
+                k_candidates=k_candidates,
+                M_sg=M_sg,
+                w_local=w_local,
+                w_global=w_global,
+                k_sg=k_sg,
+                beta_sg=beta_sg,
+                backend=backend,
+                k_candidates_local=k_candidates_local,
+                top_k=top_k
+            )
+            
+            t_end = time.time()
+            # --- END REAL-TIME SEARCH ENGINE PIPELINE ---
+            
+            for i in range(min(top_k, len(top_k_names))):
+                img_name = top_k_names[i]
                 
                 img_path = BASE_DIR / "data" / "datasets" / self.dataset_name / "jpg" / f"{img_name}.jpg"
                 img_base64 = None
