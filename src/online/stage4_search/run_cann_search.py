@@ -51,7 +51,7 @@ def cann_search(q_feats, db_feats, k_candidates=1600, dim=128, backend="auto"):
         
         ranks = []
         batch_size = 200 # Small batch size to ensure minimal VRAM usage (less than 1GB)
-        for i, q_feat in enumerate(tqdm(q_feats, desc="PyTorch Base Search")):
+        for i, q_feat in enumerate(q_feats):
             q = torch.tensor(q_feat).unsqueeze(0).to(device)
             q = q / torch.norm(q, dim=2, keepdim=True).clamp(min=1e-6)
             
@@ -92,7 +92,7 @@ def cann_search(q_feats, db_feats, k_candidates=1600, dim=128, backend="auto"):
         
         # Write query descriptors as raw binary float32 (without headers)
         query_files = []
-        for i, q_feat in enumerate(tqdm(q_feats, desc="Writing Query Features to Disk")):
+        for i, q_feat in enumerate(q_feats):
             # q_feat is [N, dim]
             feat_array = np.array(q_feat, dtype=np.float32)
             filepath = os.path.join(query_dir, f"q_{i}.desc")
@@ -102,7 +102,7 @@ def cann_search(q_feats, db_feats, k_candidates=1600, dim=128, backend="auto"):
             
         # Write database descriptors as raw binary float32
         index_files = []
-        for i, db_feat in enumerate(tqdm(db_feats, desc="Writing DB Features to Disk")):
+        for i, db_feat in enumerate(db_feats):
             feat_array = np.array(db_feat, dtype=np.float32)
             filepath = os.path.join(index_dir, f"db_{i}.desc")
             feat_array.tofile(filepath)

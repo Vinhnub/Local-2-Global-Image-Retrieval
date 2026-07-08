@@ -24,7 +24,7 @@ import fire_network
 
 import argparse
 parser = argparse.ArgumentParser()
-parser.add_argument('--dataset', default="rparis6k", help='Dataset name')
+parser.add_argument('--dataset', default="roxford5k", help='Dataset name')
 args = parser.parse_args()
 DATASET_NAME = args.dataset  # Có thể đổi thành "roxford5k" nếu cần trích xuất Oxford
 
