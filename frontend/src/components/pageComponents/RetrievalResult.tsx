@@ -37,21 +37,24 @@ export default function RetrievalResult({ retrievalImage }: Props) {
   return (
     <>
       {/* --- Main Image Grid Gallery --- */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-5 mt-0 p-10 text-black">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 mt-0 p-8 text-white">
         {retrievalImage.map((img, index) => (
           <div
             key={img.image_id}
-            onClick={() => setCurrentIdx(index)} // Opens the modal preview
-            className="rounded-xl overflow-hidden shadow border border-gray-100 bg-white cursor-pointer hover:shadow-md transition-shadow group"
+            onClick={() => setCurrentIdx(index)} 
+            className="relative rounded-xl cursor-pointer group transition-transform duration-500 hover:-translate-y-2 h-[220px]"
           >
-            <div className="overflow-hidden h-52 bg-gray-50">
+            {/* Animated Gradient Border (Chuyển màu) */}
+            <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-fuchsia-600 via-cyan-400 to-yellow-500 animate-text-gradient opacity-80 group-hover:opacity-100 transition-opacity duration-300 group-hover:shadow-[0_0_25px_rgba(217,70,239,0.6)]"></div>
+            
+            {/* Inner Image Box */}
+            <div className="absolute inset-[3px] bg-black rounded-[9px] overflow-hidden z-10">
               <img
                 src={img.image_base64.startsWith('data:') ? img.image_base64 : `data:image/jpeg;base64,${img.image_base64}`}
                 alt={`ID ${img.image_id}`}
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 opacity-90 group-hover:opacity-100"
               />
             </div>
-
           </div>
         ))}
       </div>
@@ -63,7 +66,7 @@ export default function RetrievalResult({ retrievalImage }: Props) {
           onClick={() => setCurrentIdx(null)} // Click background overlay to close
         >
           {/* Top Info Bar & Close Button */}
-          <div className="absolute top-0 inset-x-0 p-6 flex justify-between items-center bg-gradient-to-b from-black/50 to-transparent text-white">
+          <div className="absolute top-0 inset-x-0 p-6 flex justify-between items-center bg-gradient-to-b from-fuchsia-900/80 via-black/40 to-transparent text-white">
             <div className="text-sm">
               <p className="font-semibold">Image ID: {retrievalImage[currentIdx].image_id}</p>
               <p className="text-xs opacity-80 mt-0.5">

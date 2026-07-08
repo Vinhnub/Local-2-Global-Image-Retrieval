@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { CreditCard, CheckCircle2, Loader2, Router } from "lucide-react";
+import { Crown, CheckCircle2, Loader2, ArrowLeft } from "lucide-react";
 import api from "@/lib/axios";
 import { useRouter } from "next/navigation";
+import confetti from "canvas-confetti";
 
 export default function UpgradeProPage() {
   const [days, setDays] = useState<number>(30);
@@ -12,6 +13,7 @@ export default function UpgradeProPage() {
 
   const dayOptions = [30, 90, 180, 365];
   const router = useRouter()
+  
   const handleUpgrade = async () => {
     setLoading(true);
     setStatus(null);
@@ -25,6 +27,13 @@ export default function UpgradeProPage() {
       });
       
       localStorage.setItem("is_pro", res.data.is_pro)
+      
+      confetti({
+        particleCount: 200,
+        spread: 100,
+        origin: { y: 0.6 },
+        colors: ['#fbbf24', '#f59e0b', '#d97706'] // amber colors
+      });
 
     } catch (error) {
       console.log(error)
@@ -38,22 +47,36 @@ export default function UpgradeProPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
-      <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-xl ">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-indigo-950 via-violet-900 to-fuchsia-900 px-4 relative selection:bg-amber-500 selection:text-white overflow-hidden">
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-amber-400/10 via-transparent to-transparent opacity-60 pointer-events-none"></div>
+      
+      {/* Background Ambient Glowing Orbs */}
+      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-amber-600/20 rounded-full mix-blend-screen filter blur-[120px] animate-blob"></div>
+
+      <div className="w-full max-w-md rounded-2xl border border-amber-400/30 bg-[#1e1b4b]/80 p-8 shadow-[0_0_30px_rgba(245,158,11,0.2)] backdrop-blur-xl relative z-10 animate-fade-in-up">
         
-        <div className="flex flex-col items-center text-center">
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-amber-100 text-amber-600">
-            <CreditCard className="h-6 w-6" />
+        <button
+          onClick={() => router.push("/home")}
+          className="absolute top-4 left-4 p-2 text-amber-300 hover:text-white hover:bg-white/10 rounded-full transition-all cursor-pointer"
+          title="Back to home"
+        >
+          <ArrowLeft size={20} />
+        </button>
+
+        <div className="flex flex-col items-center text-center mt-2">
+          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-tr from-yellow-400 to-amber-600 shadow-[0_0_15px_rgba(245,158,11,0.5)] border-2 border-white/20">
+            <Crown className="h-8 w-8 text-yellow-950 fill-yellow-900" />
           </div>
-          <h2 className="mt-4 text-2xl font-bold text-slate-900">Update PRO</h2>
-          <p className="mt-1 text-sm text-slate-500">
-            choose how many days you want to upgrade to pro.
+          <h2 className="mt-4 text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-amber-200 to-yellow-500 drop-shadow-md tracking-tight">Upgrade PRO</h2>
+          <p className="mt-2 text-sm text-amber-100/80 font-medium">
+            Unlock premium features and become a champion.
           </p>
         </div>
 
-        <div className="mt-6 space-y-4">
-          <label className="text-sm font-medium text-slate-700">
-            Pro for: <span className="font-bold text-amber-600">{days} days</span>
+        <div className="mt-8 space-y-5">
+          <label className="text-sm font-bold text-amber-300 uppercase tracking-wider drop-shadow-sm flex justify-between items-center">
+            <span>Duration:</span> 
+            <span className="text-white bg-amber-500/20 px-3 py-1 rounded border border-amber-500/50 shadow-sm">{days} Days</span>
           </label>
           
           <input
@@ -62,22 +85,22 @@ export default function UpgradeProPage() {
             max="365"
             value={days}
             onChange={(e) => setDays(Number(e.target.value))}
-            className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-slate-200 accent-amber-500"
+            className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-black/40 accent-amber-500 outline-none focus:ring-1 focus:ring-amber-400 border border-white/10 shadow-inner"
           />
 
-          <div className="grid grid-cols-4 gap-2">
+          <div className="grid grid-cols-4 gap-2 pt-2">
             {dayOptions.map((opt) => (
               <button
                 key={opt}
                 type="button"
                 onClick={() => setDays(opt)}
-                className={`rounded-lg py-2 text-xs font-semibold border transition-all ${
+                className={`rounded-xl py-2.5 text-xs font-bold transition-all border shadow-inner ${
                   days === opt
-                    ? "border-amber-500 bg-amber-50 text-amber-600"
-                    : "border-slate-200 text-slate-600 hover:bg-slate-50"
+                    ? "border-amber-400 bg-amber-500/20 text-amber-300 shadow-[0_0_10px_rgba(245,158,11,0.4)] scale-105"
+                    : "border-white/10 bg-black/30 text-amber-100/60 hover:bg-black/50 hover:text-amber-100"
                 }`}
               >
-                {opt} ngày
+                {opt}
               </button>
             ))}
           </div>
@@ -85,13 +108,17 @@ export default function UpgradeProPage() {
 
         {status && (
           <div
-            className={`mt-4 flex items-center gap-2 rounded-lg p-3 text-sm font-medium ${
+            className={`mt-6 flex items-center gap-3 rounded-xl p-4 text-sm font-bold backdrop-blur-md border shadow-lg animate-fade-in-up ${
               status.type === "success"
-                ? "bg-emerald-50 text-emerald-700"
-                : "bg-rose-50 text-rose-700 "
+                ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/40 shadow-[0_0_15px_rgba(16,185,129,0.3)]"
+                : "bg-rose-500/20 text-rose-300 border-rose-500/40 shadow-[0_0_15px_rgba(244,63,94,0.3)]"
             }`}
           >
-            {status.type === "success" && <CheckCircle2 className="h-4 w-4 shrink-0" />}
+            {status.type === "success" ? (
+              <CheckCircle2 className="h-5 w-5 shrink-0" />
+            ) : (
+              <div className="h-5 w-5 shrink-0 rounded-full bg-rose-500/50 flex items-center justify-center font-serif text-white">!</div>
+            )}
             <span>{status.message}</span>
           </div>
         )}
@@ -100,7 +127,7 @@ export default function UpgradeProPage() {
           type="button"
           disabled={loading}
           onClick={handleUpgrade}
-          className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-amber-500 py-3 font-semibold text-white transition-all hover:bg-amber-600 focus:outline-none focus:ring-2 focus:ring-amber-500/50 disabled:opacity-50"
+          className="mt-8 flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-600 py-3.5 font-extrabold text-yellow-950 transition-all hover:from-amber-300 hover:to-yellow-500 hover:scale-[1.02] shadow-[0_0_15px_rgba(245,158,11,0.4)] hover:shadow-[0_0_25px_rgba(245,158,11,0.6)] disabled:opacity-50 disabled:hover:scale-100 uppercase tracking-wide cursor-pointer"
         >
           {loading ? (
             <>
@@ -108,23 +135,7 @@ export default function UpgradeProPage() {
               Processing...
             </>
           ) : (
-            `Update now (${days} days)`
-          )}
-        </button>
-
-        <button
-          type="button"
-          disabled={loading}
-          onClick={() => router.push("/home")}
-          className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-black py-3 font-semibold text-white transition-all hover:bg-white hover:text-black focus:outline-none focus:ring-2 focus:ring-amber-500/50 disabled:opacity-50"
-        >
-          {loading ? (
-            <>
-              <Loader2 className="h-5 w-5 animate-spin" />
-              Processing...
-            </>
-          ) : (
-            `Back`
+            `Update Now (${days} days)`
           )}
         </button>
 

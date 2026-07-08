@@ -150,16 +150,18 @@ export default function UserProfilePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 relative">
-      <div className="w-full top-0 left-0 sticky">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-950 via-violet-900 to-fuchsia-900 relative text-white selection:bg-fuchsia-500 selection:text-white">
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-blue-400/20 via-transparent to-transparent opacity-60"></div>
+      
+      <div className="w-full z-50">
         <MainHeader />
       </div>
 
-      <div className="max-w-5xl mx-auto pt-32">
+      <div className="max-w-5xl mx-auto pt-24 pb-12 px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Back Button */}
         <button
           onClick={() => router.push("/home")}
-          className="flex items-center gap-2 text-gray-600 hover:text-blue-600 font-medium mb-8 transition-colors group cursor-pointer"
+          className="flex items-center gap-2 text-fuchsia-200 hover:text-white font-medium mb-8 transition-colors group cursor-pointer"
         >
           <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
           Back to search
@@ -167,15 +169,15 @@ export default function UserProfilePage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* PROFILE CARD */}
-          <div className="lg:col-span-1 bg-white border border-gray-100 rounded-2xl p-6 shadow-sm h-fit">
-            <div className="flex flex-col items-center text-center border-b border-gray-100 pb-6 mb-6">
-              <div className="w-20 h-20 bg-gradient-to-tr from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white text-2xl font-bold shadow-md mb-4 uppercase">
+          <div className="lg:col-span-1 bg-white/10 backdrop-blur-md border border-fuchsia-400/30 rounded-2xl p-6 shadow-[0_0_15px_rgba(217,70,239,0.15)] h-fit">
+            <div className="flex flex-col items-center text-center border-b border-fuchsia-400/30 pb-6 mb-6">
+              <div className="w-20 h-20 bg-gradient-to-tr from-fuchsia-500 to-purple-600 rounded-full flex items-center justify-center text-white text-2xl font-bold shadow-[0_0_15px_rgba(217,70,239,0.5)] mb-4 uppercase border-2 border-white/20">
                 {userInfo.username.charAt(0)}
               </div>
-              <h2 className="text-xl font-bold text-gray-800 flex items-center gap-1.5">
+              <h2 className="text-xl font-bold text-white flex items-center gap-1.5 drop-shadow-md">
                 {userInfo.is_pro === "true" || userInfo.is_pro === "True" ? (
                   <>
-                    Premium User <Crown size={16} className="text-amber-500 fill-amber-500" />
+                    Premium User <Crown size={16} className="text-yellow-400 fill-yellow-400 drop-shadow-[0_0_5px_rgba(250,204,21,0.8)]" />
                   </>
                 ) : (
                   "Normal User"
@@ -184,47 +186,47 @@ export default function UserProfilePage() {
             </div>
 
             <div className="space-y-4">
-              <div className="flex items-center gap-3 text-gray-600 text-sm">
-                <User size={16} className="text-gray-400" />
-                <span>Full Name: {userInfo.username}</span>
+              <div className="flex items-center gap-3 text-fuchsia-100 text-sm">
+                <User size={16} className="text-fuchsia-300" />
+                <span>Full Name: <strong className="text-white">{userInfo.username}</strong></span>
               </div>
-              <div className="flex items-center gap-3 text-gray-600 text-sm">
-                <Calendar size={16} className="text-gray-400" />
-                <span>Joined: {formatDate(userInfo.created_at || "None")}</span>
+              <div className="flex items-center gap-3 text-fuchsia-100 text-sm">
+                <Calendar size={16} className="text-fuchsia-300" />
+                <span>Joined: <strong className="text-white">{formatDate(userInfo.created_at || "None")}</strong></span>
               </div>
             </div>
           </div>
 
           {/* HISTORY LIST */}
-          <div className="lg:col-span-2 bg-white border border-gray-100 rounded-2xl p-6 shadow-sm flex flex-col justify-between min-h-[400px]">
+          <div className="lg:col-span-2 bg-white/10 backdrop-blur-md border border-fuchsia-400/30 rounded-2xl p-6 shadow-[0_0_15px_rgba(217,70,239,0.15)] flex flex-col justify-between min-h-[400px]">
             <div>
-              <h3 className="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2">
-                <Clock size={18} className="text-blue-500" /> Search History
+              <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-2 drop-shadow-md">
+                <Clock size={18} className="text-fuchsia-400" /> Search History
               </h3>
 
               {isLoading ? (
                 <div className="flex justify-center items-center py-12">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-fuchsia-400"></div>
                 </div>
               ) : historyList.length === 0 ? (
-                <p className="text-gray-500 text-center py-8">No search history found.</p>
+                <p className="text-fuchsia-200 text-center py-8">No search history found.</p>
               ) : (
-                <div className="divide-y divide-gray-100">
+                <div className="divide-y divide-fuchsia-400/20">
                   {currentItems.map((item) => (
                     <div
                       key={item._id || item.id}
-                      className="py-4 flex items-center justify-between hover:bg-gray-50/80 px-2 rounded-xl transition-colors cursor-pointer group"
+                      className="py-4 flex items-center justify-between hover:bg-white/10 px-3 rounded-xl transition-colors cursor-pointer group"
                       onClick={() => handleViewDetail(Number(item.id || item._id))}
                     >
                       <div>
-                        <p className="font-semibold text-gray-800 group-hover:text-blue-600 transition-colors">
+                        <p className="font-semibold text-white group-hover:text-fuchsia-300 transition-colors drop-shadow-sm">
                           {item.search_term || "Visual Query Search"}
                         </p>
-                        <p className="text-xs text-gray-400 mt-1">
+                        <p className="text-xs text-fuchsia-200 mt-1">
                           {formatDate(item.date ?? item.created_at ?? "")}
                         </p>
                       </div>
-                      <span className="text-xs font-medium text-blue-600 bg-blue-50 px-2.5 py-1 rounded-full group-hover:bg-blue-100 transition-colors">
+                      <span className="text-xs font-medium text-white bg-fuchsia-600/50 border border-fuchsia-400/50 px-3 py-1.5 rounded-full group-hover:bg-fuchsia-500/80 group-hover:shadow-[0_0_10px_rgba(217,70,239,0.5)] transition-all">
                         View Results
                       </span>
                     </div>
@@ -235,23 +237,23 @@ export default function UserProfilePage() {
 
             {/* Pagination Controls */}
             {!isLoading && historyList.length > itemsPerPage && (
-              <div className="flex items-center justify-between border-t border-gray-100 pt-4 mt-6">
-                <span className="text-sm text-gray-500">
-                  Page <strong className="text-gray-700">{currentPage}</strong> on <strong className="text-gray-700">{totalPages}</strong>
+              <div className="flex items-center justify-between border-t border-fuchsia-400/30 pt-4 mt-6">
+                <span className="text-sm text-fuchsia-200">
+                  Page <strong className="text-white">{currentPage}</strong> on <strong className="text-white">{totalPages}</strong>
                 </span>
 
                 <div className="flex gap-2">
                   <button
                     onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                     disabled={currentPage === 1}
-                    className="px-3 py-1.5 text-sm font-medium text-gray-600 bg-gray-50 rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors border border-gray-200"
+                    className="px-3 py-1.5 text-sm font-medium text-white bg-white/10 rounded-lg hover:bg-white/20 disabled:opacity-40 disabled:cursor-not-allowed transition-colors border border-white/20"
                   >
                     pre
                   </button>
                   <button
                     onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
                     disabled={currentPage === totalPages}
-                    className="px-3 py-1.5 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    className="px-3 py-1.5 text-sm font-medium text-white bg-gradient-to-r from-fuchsia-600 to-purple-600 rounded-lg hover:from-fuchsia-500 hover:to-purple-500 disabled:opacity-40 disabled:cursor-not-allowed transition-colors shadow-md"
                   >
                     next
                   </button>
@@ -264,14 +266,14 @@ export default function UserProfilePage() {
 
       {/* --- HISTORY DETAIL MODAL --- */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-fade-in">
-          <div className="bg-white rounded-2xl max-w-3xl w-full max-h-[85vh] overflow-y-auto shadow-2xl flex flex-col">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md p-4 animate-fade-in">
+          <div className="bg-[#1e1b4b]/90 rounded-2xl border border-fuchsia-400/30 max-w-3xl w-full max-h-[85vh] overflow-y-auto shadow-[0_0_30px_rgba(217,70,239,0.3)] flex flex-col text-white backdrop-blur-xl">
             {/* Modal Header */}
-            <div className="p-6 border-b border-gray-100 flex items-center justify-between sticky top-0 bg-white z-10">
-              <h3 className="text-xl font-bold text-gray-800">Search Session Details</h3>
+            <div className="p-6 border-b border-fuchsia-400/30 flex items-center justify-between sticky top-0 bg-[#1e1b4b]/95 z-10 backdrop-blur-md">
+              <h3 className="text-xl font-bold text-white drop-shadow-md">Search Session Details</h3>
               <button
                 onClick={() => setIsModalOpen(false)}
-                className="p-1.5 rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-700 transition-colors cursor-pointer"
+                className="p-1.5 rounded-lg text-fuchsia-300 hover:bg-white/10 hover:text-white transition-colors cursor-pointer"
               >
                 <X size={20} />
               </button>
@@ -281,34 +283,34 @@ export default function UserProfilePage() {
             <div className="p-6 space-y-6 flex-1">
               {isDetailLoading ? (
                 <div className="flex flex-col justify-center items-center py-20 gap-3">
-                  <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div>
-                  <p className="text-gray-400 text-sm">Fetching search results...</p>
+                  <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-fuchsia-400"></div>
+                  <p className="text-fuchsia-200 text-sm">Fetching search results...</p>
                 </div>
               ) : selectedDetail ? (
                 <>
                   {/* Query Info Meta */}
-                  <div className="grid grid-cols-2 gap-4 bg-gray-50 p-4 rounded-xl text-sm text-gray-600">
+                  <div className="grid grid-cols-2 gap-4 bg-white/5 border border-white/10 p-4 rounded-xl text-sm text-fuchsia-100">
                     <div>
-                      <span className="font-medium text-gray-400 block mb-0.5">Top-K Requested:</span>
-                      <span className="font-semibold text-gray-800">{selectedDetail.top_k_requested}</span>
+                      <span className="font-medium text-fuchsia-300 block mb-0.5">Top-K Requested:</span>
+                      <span className="font-semibold text-white">{selectedDetail.top_k_requested}</span>
                     </div>
                     <div>
-                      <span className="font-medium text-gray-400 block mb-0.5">Executed At:</span>
-                      <span className="font-semibold text-gray-800 text-xs">{formatDate(selectedDetail.created_at)} </span>
+                      <span className="font-medium text-fuchsia-300 block mb-0.5">Executed At:</span>
+                      <span className="font-semibold text-white text-xs">{formatDate(selectedDetail.created_at)} </span>
                     </div>
                   </div>
 
                   {/* Image Grid Area */}
                   <div>
-                    <h4 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-3">Returned Images</h4>
+                    <h4 className="text-sm font-bold text-fuchsia-400 uppercase tracking-wider mb-3">Returned Images</h4>
                     {!selectedDetail.results || selectedDetail.results.length === 0 ? (
-                      <p className="text-sm text-gray-400">No matching image metrics returned.</p>
+                      <p className="text-sm text-fuchsia-200/70">No matching image metrics returned.</p>
                     ) : (
                       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
                         {selectedDetail.results.map((item, index) => (
                           <div
                             key={item.id || index}
-                            className="relative group overflow-hidden rounded-xl border border-gray-100 cursor-pointer shadow-sm hover:shadow-md transition-shadow"
+                            className="relative group overflow-hidden rounded-xl border border-white/10 bg-black/40 cursor-pointer shadow-sm hover:shadow-[0_0_15px_rgba(217,70,239,0.5)] hover:border-fuchsia-400/50 transition-all"
                             onClick={() => setActiveLightboxIdx(index)}
                           >
                             <img
@@ -316,12 +318,12 @@ export default function UserProfilePage() {
                               alt={`Result view ${index}`}
                               className="w-full h-40 object-cover group-hover:scale-105 transition-transform duration-300"
                             />
-                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-1.5 text-white">
+                            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-1.5 text-white">
                               <ImageIcon size={20} />
                               <span className="text-xs font-medium">Click to Zoom</span>
                             </div>
                             {item.score !== undefined && (
-                              <div className="absolute bottom-2 left-2 bg-black/60 backdrop-blur-xs text-[10px] text-white px-2 py-0.5 rounded font-mono">
+                              <div className="absolute bottom-2 left-2 bg-black/70 backdrop-blur-md text-[10px] text-fuchsia-200 px-2 py-0.5 rounded border border-white/10 font-mono">
                                 Score: {item.score.toFixed(4)}
                               </div>
                             )}
@@ -333,14 +335,14 @@ export default function UserProfilePage() {
 
                   {/* Feedback Section */}
                   {(selectedDetail.feedback_rating > 0 || selectedDetail.feedback_comment) && (
-                    <div className="border-t border-gray-100 pt-6">
-                      <h4 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-3">Your Feedback</h4>
-                      <div className="bg-blue-50/50 rounded-xl p-4 border border-blue-50">
-                        <p className="text-sm font-semibold text-blue-800">
+                    <div className="border-t border-fuchsia-400/30 pt-6">
+                      <h4 className="text-sm font-bold text-fuchsia-400 uppercase tracking-wider mb-3">Your Feedback</h4>
+                      <div className="bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-fuchsia-400/20">
+                        <p className="text-sm font-semibold text-yellow-400 drop-shadow-sm">
                           Rating: {"⭐".repeat(selectedDetail.feedback_rating)}
                         </p>
                         {selectedDetail.feedback_comment && (
-                          <p className="text-sm text-gray-600 mt-1.5 italic">
+                          <p className="text-sm text-fuchsia-100 mt-1.5 italic">
                             "{selectedDetail.feedback_comment}"
                           </p>
                         )}
@@ -349,7 +351,7 @@ export default function UserProfilePage() {
                   )}
                 </>
               ) : (
-                <p className="text-center text-gray-500">Failed to render detail metadata.</p>
+                <p className="text-center text-fuchsia-300/70">Failed to render detail metadata.</p>
               )}
             </div>
           </div>

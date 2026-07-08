@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import AuthGuard from "@/src/components/AuthGuard";
 import { Toaster } from "react-hot-toast";
+import AboutUs from "@/src/components/AboutUs";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -25,11 +26,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-      <html lang="en">
+      <html lang="en" suppressHydrationWarning>
         <body>
           <AuthGuard>
             {children}
           </AuthGuard>
+          <AboutUs />
         <Toaster
           position="top-right"
           reverseOrder={false}

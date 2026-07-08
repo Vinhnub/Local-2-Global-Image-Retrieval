@@ -4,7 +4,8 @@ import api from "@/lib/axios";
 import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import axios from "axios";
-import { CircleOff, CircleX } from "lucide-react";
+import { CircleOff, CircleX, Trophy, Star, Send, CheckCircle2, XCircle } from "lucide-react";
+import confetti from "canvas-confetti";
 
 export interface RetrievalResult {
   image_id: string;
@@ -36,6 +37,7 @@ const UploadFile = ({ setRetrievalImage }: RetrievalImageProps) => {
   const [showUploadModal, setShowUploadModal] = useState(false);
   
   const [showNeedLogin, setShowNeedLogin] = useState(false);
+  const [feedbackStatus, setFeedbackStatus] = useState<{type: "success" | "error", message: string} | null>(null);
 
   // 1. Check and restore cached data from LocalStorage on component mount
   useEffect(() => {
@@ -119,6 +121,14 @@ const UploadFile = ({ setRetrievalImage }: RetrievalImageProps) => {
       setMini(true);
       toast.success("Upload successful!");
 
+      // Trigger WC26 themed confetti
+      confetti({
+        particleCount: 150,
+        spread: 80,
+        origin: { y: 0.6 },
+        colors: ['#d946ef', '#facc15', '#22d3ee']
+      });
+
       // 2. Cache successful session results to local storage
       localStorage.setItem("cached_query_id", query_id);
       localStorage.setItem("cached_mini", "true");
@@ -146,7 +156,12 @@ const UploadFile = ({ setRetrievalImage }: RetrievalImageProps) => {
 
   const handleFeedback = async () => {
     if (!queryId) {
-      toast.error("Query ID not found.");
+      setFeedbackStatus({ type: "error", message: "Query ID not found." });
+      return;
+    }
+    
+    if (rating === 0) {
+      setFeedbackStatus({ type: "error", message: "Please select a rating before submitting." });
       return;
     }
 
@@ -159,15 +174,30 @@ const UploadFile = ({ setRetrievalImage }: RetrievalImageProps) => {
         comment,
       });
 
-      toast.success(res.data.message || "Feedback submitted successfully!");
+      setFeedbackStatus({ type: "success", message: res.data.message || "Feedback submitted successfully!" });
       setComment("");
       setRating(0);
+      
+      confetti({
+        particleCount: 100,
+        spread: 60,
+        origin: { y: 0.6 },
+        colors: ['#10b981', '#34d399', '#a7f3d0'] // emerald colors
+      });
+
     } catch (error) {
       console.error(error);
       if (axios.isAxiosError(error)) {
-        toast.error(error.response?.data?.detail ?? "An error occurred.");
+        const detail = error.response?.data?.detail;
+        if (Array.isArray(detail)) {
+          setFeedbackStatus({ type: "error", message: detail[0].msg || "Validation error" });
+        } else if (typeof detail === "string") {
+          setFeedbackStatus({ type: "error", message: detail });
+        } else {
+          setFeedbackStatus({ type: "error", message: "An error occurred." });
+        }
       } else {
-        toast.error("Undefined error.");
+        setFeedbackStatus({ type: "error", message: "Undefined error." });
       }
     } finally {
       setSubmitting(false);
@@ -193,7 +223,7 @@ const UploadFile = ({ setRetrievalImage }: RetrievalImageProps) => {
       {/* Upload & Preview Box */}
       <div
         onClick={handleAddImage}
-        className={`group rounded-2xl border-2 border-dashed border-gray-300 hover:border-black transition-all duration-700 cursor-pointer flex flex-col items-center justify-center bg-white/40 hover:bg-white overflow-hidden relative
+        className={`group rounded-2xl border-2 border-dashed border-fuchsia-400/60 hover:border-fuchsia-300 transition-all duration-700 cursor-pointer flex flex-col items-center justify-center bg-white/10 hover:bg-white/20 backdrop-blur-md shadow-[0_0_15px_rgba(217,70,239,0.15)] hover:shadow-[0_0_30px_rgba(217,70,239,0.4)] overflow-hidden relative
           ${mini ? "w-[350px] h-[280px]" : "w-[40%] h-[400px]"}`}
       >
         <input
@@ -230,17 +260,12 @@ const UploadFile = ({ setRetrievalImage }: RetrievalImageProps) => {
           </div>
         ) : (
           <div className="flex flex-col items-center gap-3 p-4 text-center opacity-100 ">
-            <svg
-              className="w-14 h-14 text-white group-hover:text-black transition-colors"
-              fill="none"
-              stroke="currentColor"
+            <Trophy
+              className="w-16 h-16 text-fuchsia-300 group-hover:text-fuchsia-200 transition-colors drop-shadow-md"
               strokeWidth={1.5}
-              viewBox="0 0 24 24"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 16V4m0 0l-4 4m4-4l4 4M4 20h16" />
-            </svg>
-            <p className="text-lg font-semibold text-white group-hover:text-black transition-colors">
-              Click to upload image
+            />
+            <p className="text-lg font-bold text-fuchsia-100 group-hover:text-white transition-colors tracking-wide">
+              Upload Image to Kick Off Search!
             </p>
             {error && <p className="text-red-500 text-sm font-medium mt-2">{error}</p>}
           </div>
@@ -248,17 +273,25 @@ const UploadFile = ({ setRetrievalImage }: RetrievalImageProps) => {
       </div>
 
       {/* Feedback Section */}
-      <div className={`flex flex-col gap-4 text-black transition-all duration-500 bg-white p-5 rounded-2xl ${mini ? "w-[25%] opacity-100" : "w-0 opacity-0 pointer-events-none hidden"} `}>
-        <h2 className="font-semibold text-lg">Feedback</h2>
-        <div className="flex gap-2">
+      <div className={`flex flex-col gap-4 text-white transition-all duration-500 bg-[#1e1b4b]/80 backdrop-blur-xl border border-fuchsia-500/30 p-6 rounded-2xl shadow-[0_0_30px_rgba(217,70,239,0.15)] ${mini ? "w-[320px] opacity-100" : "w-0 opacity-0 pointer-events-none hidden"} `}>
+        <div className="flex flex-col gap-1">
+          <h2 className="font-bold text-xl flex items-center gap-2 text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-300 to-cyan-300 drop-shadow-sm">
+            Rate Your Search
+          </h2>
+          <p className="text-xs text-fuchsia-100/70 font-medium">Help us improve the image retrieval engine.</p>
+        </div>
+        
+        <div className="flex justify-between items-center bg-black/30 p-3 rounded-xl border border-white/5">
           {[1, 2, 3, 4, 5].map((num) => (
             <button
               key={num}
               onClick={() => setRating(num)}
-              className={`w-8 h-8 rounded-full border transition font-medium
-                ${rating === num ? "bg-black text-white border-black" : "bg-white text-black border-gray-300 hover:bg-gray-100"}`}
+              className={`p-1.5 rounded-full transition-all duration-300 transform hover:scale-110 focus:outline-none
+                ${rating >= num 
+                  ? "text-yellow-400 drop-shadow-[0_0_10px_rgba(250,204,21,0.8)]" 
+                  : "text-white/20 hover:text-white/50"}`}
             >
-              {num}
+              <Star className="w-6 h-6 fill-current" strokeWidth={1} />
             </button>
           ))}
         </div>
@@ -266,57 +299,115 @@ const UploadFile = ({ setRetrievalImage }: RetrievalImageProps) => {
         <textarea
           value={comment}
           onChange={(e) => setComment(e.target.value)}
-          placeholder="Write your comment..."
-          className="border rounded-lg p-3 w-full h-24 resize-none focus:outline-none focus:border-black"
+          placeholder="Tell us what you liked or how we can improve..."
+          className="border border-white/10 bg-black/40 text-sm text-fuchsia-50 rounded-xl p-3 w-full h-28 resize-none focus:outline-none focus:border-fuchsia-400 focus:ring-1 focus:ring-fuchsia-400/50 placeholder-fuchsia-200/30 transition-all shadow-inner"
         />
 
         <button
-          className="bg-blue-600 hover:bg-blue-700 text-white rounded-lg px-4 py-2 font-medium transition disabled:bg-gray-400"
+          className="group flex items-center justify-center gap-2 bg-gradient-to-r from-fuchsia-600 to-cyan-600 hover:from-fuchsia-500 hover:to-cyan-500 text-white rounded-xl px-4 py-3 font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_15px_rgba(217,70,239,0.4)] hover:shadow-[0_0_25px_rgba(34,211,238,0.5)] cursor-pointer"
           onClick={handleFeedback}
           disabled={submitting}
         >
-          {submitting ? "Submitting..." : "Submit Feedback"}
+          {submitting ? (
+            <>
+              <div className="w-4 h-4 rounded-full border-2 border-white border-t-transparent animate-spin"></div>
+              Submitting...
+            </>
+          ) : (
+            <>
+              <Send className="w-4 h-4 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+              Send Feedback
+            </>
+          )}
         </button>
       </div>
 
       {/* POPUP UPLOAD PROGRESS */}
       {showUploadModal && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center animate-fade-in">
-          <div className="bg-white rounded-2xl p-6 w-[350px] flex flex-col items-center shadow-2xl border border-gray-100">
-            <h3 className="font-semibold text-gray-800 text-lg mb-4">Retrieving Images...</h3>
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center animate-fade-in">
+          <div className="bg-[#1e1b4b]/90 rounded-2xl p-6 w-[350px] flex flex-col items-center shadow-[0_0_30px_rgba(217,70,239,0.3)] border border-fuchsia-400/30 backdrop-blur-xl">
+            <h3 className="font-bold text-white text-lg mb-4 drop-shadow-md">Retrieving Images...</h3>
             <div className="relative flex items-center justify-center mb-4">
-              <div className="h-16 w-16 rounded-full border-4 border-gray-200"></div>
-              <div className="absolute h-16 w-16 rounded-full border-4 border-blue-600 border-t-transparent animate-spin"></div>
-              <span className="absolute text-sm font-semibold text-blue-600">{uploadProgress}%</span>
+              <div className="h-16 w-16 rounded-full border-4 border-white/10"></div>
+              <div className="absolute h-16 w-16 rounded-full border-4 border-fuchsia-500 border-t-transparent animate-spin"></div>
+              <span className="absolute text-sm font-semibold text-fuchsia-300">{uploadProgress}%</span>
             </div>
-            <div className="w-full bg-gray-200 rounded-full h-2 mb-2 overflow-hidden">
-              <div className="bg-blue-600 h-full rounded-full transition-all duration-300 ease-out" style={{ width: `${uploadProgress}%` }}></div>
+            <div className="w-full bg-white/10 rounded-full h-2 mb-2 overflow-hidden border border-white/5">
+              <div className="bg-gradient-to-r from-fuchsia-600 to-cyan-400 h-full rounded-full transition-all duration-300 ease-out shadow-[0_0_10px_rgba(217,70,239,0.5)]" style={{ width: `${uploadProgress}%` }}></div>
             </div>
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs text-fuchsia-200/70 mt-1">
               {uploadProgress < 100 ? "Uploading and processing image..." : "Finalizing results..."}
             </p>
           </div>
         </div>
       )}
 
+      {/* POPUP LOGIN REQUIRED */}
       {showNeedLogin && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center animate-fade-in">
-          <div className="bg-white rounded-2xl p-6 w-[350px] flex flex-col items-center shadow-2xl border border-gray-100 relative gap-3">
-            <h3 className="font-semibold text-gray-800 text-lg mb-4">Login now!</h3>
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center animate-fade-in">
+          <div className="bg-[#1e1b4b]/90 rounded-2xl p-6 w-[350px] flex flex-col items-center shadow-[0_0_30px_rgba(239,68,68,0.3)] border border-red-500/30 backdrop-blur-xl relative gap-3">
+            <h3 className="font-bold text-white text-lg mb-2 drop-shadow-md">Authentication Required</h3>
             
-            <div className="relative flex items-center justify-center mb-4 text-red">
-              <CircleX className="animate-bounce w-20 h-20" color="red"/>
+            <div className="relative flex items-center justify-center mb-2">
+              <CircleX className="animate-bounce w-16 h-16 text-red-500 drop-shadow-[0_0_15px_rgba(239,68,68,0.6)]" strokeWidth={1.5} />
             </div>
             
-            <p className="text-sm text-gray-500 text-center mb-4">
-              You need to log in to execute image retrieval.
+            <p className="text-sm text-fuchsia-100/80 text-center mb-4">
+              You need to <strong className="text-white">Log In</strong> to execute image retrieval.
+            </p>
+
+            <div className="flex gap-3 w-full mt-2">
+              <button 
+                onClick={() => setShowNeedLogin(false)}
+                className="flex-1 bg-white/10 border border-white/20 text-white py-2.5 rounded-xl text-sm font-medium hover:bg-white/20 transition-colors backdrop-blur-md"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={() => window.location.href = '/login'}
+                className="flex-1 bg-gradient-to-r from-fuchsia-600 to-purple-600 border border-fuchsia-400/50 text-white py-2.5 rounded-xl text-sm font-medium hover:from-fuchsia-500 hover:to-purple-500 shadow-[0_0_15px_rgba(217,70,239,0.4)] transition-all"
+              >
+                Log In Now
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* POPUP FEEDBACK STATUS */}
+      {feedbackStatus && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-[100] flex items-center justify-center animate-fade-in" onClick={() => setFeedbackStatus(null)}>
+          <div 
+            className={`rounded-3xl p-8 w-[380px] flex flex-col items-center shadow-2xl border backdrop-blur-xl relative gap-3 animate-fade-in-up
+              ${feedbackStatus.type === 'success' 
+                ? 'bg-emerald-950/80 border-emerald-500/40 shadow-[0_0_40px_rgba(16,185,129,0.3)]' 
+                : 'bg-rose-950/80 border-rose-500/40 shadow-[0_0_40px_rgba(225,29,72,0.3)]'}`}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {feedbackStatus.type === 'success' ? (
+              <div className="flex h-20 w-20 items-center justify-center rounded-full bg-emerald-500/20 border-2 border-emerald-400/50 drop-shadow-[0_0_15px_rgba(16,185,129,0.5)]">
+                <CheckCircle2 className="h-10 w-10 text-emerald-400" />
+              </div>
+            ) : (
+              <div className="flex h-20 w-20 items-center justify-center rounded-full bg-rose-500/20 border-2 border-rose-400/50 drop-shadow-[0_0_15px_rgba(225,29,72,0.5)]">
+                <XCircle className="h-10 w-10 text-rose-400" />
+              </div>
+            )}
+            
+            <h3 className="font-extrabold text-transparent bg-clip-text text-2xl mt-4 drop-shadow-md text-center"
+                style={{ backgroundImage: feedbackStatus.type === 'success' ? 'linear-gradient(to right, #34d399, #10b981)' : 'linear-gradient(to right, #fb7185, #e11d48)' }}>
+              {feedbackStatus.type === 'success' ? 'Thank You!' : 'Action Failed'}
+            </h3>
+            
+            <p className="text-sm text-center text-white/90 font-medium leading-relaxed px-4">
+              {feedbackStatus.message}
             </p>
 
             <button 
-              onClick={() => setShowNeedLogin(false)}
-              className="mt-2 w-full bg-gray-900 text-white py-2 rounded-xl text-sm font-medium hover:bg-black transition-colors"
+              onClick={() => setFeedbackStatus(null)}
+              className="mt-6 w-full bg-white/10 border border-white/20 text-white py-3 rounded-xl text-sm font-bold hover:bg-white/20 hover:shadow-[0_0_15px_rgba(255,255,255,0.2)] transition-all backdrop-blur-md uppercase tracking-wider"
             >
-              Close
+              Continue
             </button>
           </div>
         </div>
