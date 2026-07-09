@@ -1,21 +1,21 @@
 # Stage 2: Global Feature Extraction (CVNet)
 
-## 📌 Chức năng
-Stage 2 đảm nhiệm việc trích xuất **Đặc trưng Toàn cục (Global Features)** cho tất cả các bức ảnh.
-Sử dụng mô hình **CVNet-R101** (ResNet-101), mỗi bức ảnh sẽ được nén toàn bộ thông tin (bối cảnh, màu sắc, hình khối lớn) thành một vector duy nhất. 
+## 📌 What it does
+Stage 2 is responsible for extracting **Global Features** for all images.
+Using the **CVNet-R101** (ResNet-101) model, each image will have its entire information (context, colors, large shapes) compressed into a single vector.
 
-## 📥 Dữ liệu Đầu vào (Input)
-*   Thư mục chứa ảnh gốc (`data/datasets/roxford5k/jpg/`).
-*   Trọng số mô hình CVNet: `CVNet/weights/CVNet-R101.pth`.
+## 📥 Input Data
+*   Directory containing original images (`data/datasets/roxford5k/jpg/`).
+*   CVNet model weights: `CVNet/weights/CVNet-R101.pth`.
 
-## 📤 Dữ liệu Đầu ra (Output)
-*   Thư mục lưu trữ: `output/stage2/features/roxford5k/`
-*   Các file định dạng numpy `.npy`.
-*   Shape của mỗi file `.npy` là `(2048,)` (Một vector 2048 chiều).
+## 📤 Output Data
+*   Storage directory: `output/stage2/features/roxford5k/`
+*   Numpy `.npy` files.
+*   The shape of each `.npy` file is `(2048,)` (A 2048-dimensional vector).
 
-## 🚀 Cách chạy (How to run)
+## 🚀 How to run
 
-Từ thư mục gốc dự án, chạy lệnh:
+From the project root directory, run the command:
 
 ```bash
 python src/offline/stage2_global_extract/extract_global.py

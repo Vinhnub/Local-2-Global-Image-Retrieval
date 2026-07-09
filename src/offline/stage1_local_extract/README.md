@@ -1,21 +1,21 @@
 # Stage 1: Local Feature Extraction (FIRe)
 
-## 📌 Chức năng
-Stage 1 chịu trách nhiệm trích xuất **Đặc trưng Cục bộ (Local Features)** từ tất cả các hình ảnh trong Database và Query.
-Hệ thống sử dụng mô hình **FIRe** (phát triển bởi Facebook AI). Đối với mỗi bức ảnh, mô hình sẽ quét qua và trích xuất ra 600 vector cục bộ (mỗi vector dài 128 chiều) đại diện cho các vùng chi tiết khác nhau trên bức ảnh.
+## 📌 What it does
+Stage 1 is responsible for extracting **Local Features** from all images in the Database and Query set.
+The system uses the **FIRe** model (developed by Facebook AI). For each image, the model scans and extracts 600 local vectors (each 128 dimensions long) representing different detail regions on the image.
 
-## 📥 Dữ liệu Đầu vào (Input)
-*   Thư mục chứa ảnh gốc (ví dụ: `data/datasets/roxford5k/jpg/`).
-*   Trọng số mô hình FIRe: `fire/model/model_best.pth.tar`.
+## 📥 Input Data
+*   Directory containing original images (e.g., `data/datasets/roxford5k/jpg/`).
+*   FIRe model weights: `fire/model/model_best.pth.tar`.
 
-## 📤 Dữ liệu Đầu ra (Output)
-*   Thư mục lưu trữ: `output/stage1/features/roxford5k/`
-*   Các file định dạng numpy `.npy`, mỗi file tương ứng với một bức ảnh.
-*   Shape của mỗi file `.npy` là `(600, 128)`.
+## 📤 Output Data
+*   Storage directory: `output/stage1/features/roxford5k/`
+*   Numpy `.npy` files, each corresponding to one image.
+*   The shape of each `.npy` file is `(600, 128)`.
 
-## 🚀 Cách chạy (How to run)
+## 🚀 How to run
 
-Di chuyển vào thư mục gốc của dự án và chạy lệnh sau:
+Navigate to the project root directory and run the following command:
 
 ```bash
 python src/offline/stage1_local_extract/extract_local.py

@@ -1,30 +1,30 @@
 # Stage 4: Search & Evaluate mAP
 
-## 📌 Chức năng
-Stage 4 là vòng kiểm thử hàng loạt (Evaluation). Nó sẽ lấy toàn bộ tập ảnh Query (ví dụ 55 ảnh truy vấn của tập Oxford5k), đưa vào hệ thống L2G để tìm kiếm. 
-Mục tiêu là mô phỏng luồng chạy L2G thực tế:
-1.  **Base Search:** So sánh Query với Database để lấy top 1600.
-2.  **MDS Embedding:** Nén từ ma trận Chamfer (có sử dụng Sparse Lookup siêu tốc từ Stage 3) thành vector.
-3.  **L2G Fusion & Graph Diffusion:** Hợp nhất Local + Global và chạy mô hình Đồ thị.
-Sau đó, hệ thống sẽ tự động so sánh danh sách kết quả với Ground Truth (đáp án chuẩn do con người gán) để chấm điểm mAP (Mean Average Precision) cho 3 độ khó: Easy, Medium, Hard.
+## 📌 What it does
+Stage 4 is the batch evaluation round. It takes the entire Query image set (e.g., the 55 query images from the Oxford5k set) and inputs them into the L2G system for searching.
+The goal is to simulate the actual L2G running flow:
+1.  **Base Search:** Compare the Query with the Database to get the top 1600.
+2.  **MDS Embedding:** Compress from the Chamfer matrix (using ultra-fast Sparse Lookup from Stage 3) into a vector.
+3.  **L2G Fusion & Graph Diffusion:** Merge Local + Global and run the Graph model.
+After that, the system automatically compares the result list with the Ground Truth (human-annotated correct answers) to calculate the mAP (Mean Average Precision) score for 3 difficulty levels: Easy, Medium, Hard.
 
-## 📥 Dữ liệu Đầu vào (Input)
-*   Đặc trưng Local & Global của toàn bộ Query và Database (Stage 1 & 2).
-*   Từ điển Sparse Lookup: `output/stage3/roxford5k_sparse_sim.pkl` (Bắt buộc phải có, nếu chưa chạy Stage 3 hệ thống sẽ báo lỗi).
+## 📥 Input Data
+*   Local & Global features of the entire Query and Database sets (Stages 1 & 2).
+*   Sparse Lookup Dictionary: `output/stage3/roxford5k_sparse_sim.pkl` (Required, if Stage 3 hasn't been run, the system will throw an error).
 
-## 📤 Dữ liệu Đầu ra (Output)
-*   Bảng điểm mAP in ra màn hình.
-*   File Text log kết quả: `output/stage3/roxford5k_final_results.txt`.
-*   File Ranking: `output/stage3/roxford5k_ranks.npy`.
+## 📤 Output Data
+*   mAP score table printed to the screen.
+*   Text log file of results: `output/stage3/roxford5k_final_results.txt`.
+*   Ranking file: `output/stage3/roxford5k_ranks.npy`.
 
-## 🚀 Cách chạy (How to run)
+## 🚀 How to run
 
-Từ thư mục gốc dự án, chạy lệnh:
+From the project root directory, run the command:
 
 ```bash
-# Chạy với Backend Tự động (Ưu tiên CANN nếu có, không có dùng PyTorch)
+# Run with Auto Backend (Prioritizes CANN if available, otherwise uses PyTorch)
 python src/online/stage4_search/search_exact_chamfer.py --backend auto
 
-# Hoặc ép buộc chạy bằng PyTorch GPU 
+# Or force run with PyTorch GPU 
 python src/online/stage4_search/search_exact_chamfer.py --backend pytorch
 ```

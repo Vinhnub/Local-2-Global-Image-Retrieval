@@ -1,30 +1,30 @@
 # Stage 5: Real-time Test Query
 
-## 📌 Chức năng
-Stage 5 là một ứng dụng "chạy thực tế" của hệ thống L2G. 
-Thay vì lấy ảnh Query trong tập Dataset có sẵn, Stage 5 cho phép bạn đưa vào một bức ảnh định dạng `jpg` (hoặc `png`) bất kỳ lấy từ bên ngoài.
-Khi bạn đưa ảnh vào, Stage 5 sẽ:
-1.  Khởi tạo tức thời 2 mô hình (FIRe và CVNet) để trích xuất Local & Global cho ảnh đó.
-2.  Chạy pipeline L2G siêu tốc sử dụng từ điển Sparse Lookup.
-3.  Vẽ (Visualize) trực quan bức ảnh Query của bạn bên cạnh Top 20 ảnh giống nhất trong kho dữ liệu (Database).
+## 📌 What it does
+Stage 5 is a "real-world" application of the L2G system.
+Instead of taking a Query image from the existing Dataset, Stage 5 allows you to input any external `jpg` (or `png`) image.
+When you input an image, Stage 5 will:
+1.  Instantly initialize 2 models (FIRe and CVNet) to extract Local & Global features for that image.
+2.  Run the ultra-fast L2G pipeline using the Sparse Lookup dictionary.
+3.  Visualize your Query image alongside the Top 20 most similar images in the Database.
 
-## 📥 Dữ liệu Đầu vào (Input)
-*   Đường dẫn tới 1 file ảnh (ví dụ: `my_test_image.jpg`).
-*   Các file model weights (FIRe và CVNet).
-*   Từ điển Sparse Lookup: `output/stage3/roxford5k_sparse_sim.pkl` (Bắt buộc phải có, nếu chưa chạy Stage 3 hệ thống sẽ báo lỗi).
+## 📥 Input Data
+*   Path to 1 image file (e.g., `my_test_image.jpg`).
+*   Model weights files (FIRe and CVNet).
+*   Sparse Lookup Dictionary: `output/stage3/roxford5k_sparse_sim.pkl` (Required, if Stage 3 hasn't been run, the system will throw an error).
 
-## 📤 Dữ liệu Đầu ra (Output)
-*   Thời gian tìm kiếm (tốc độ xử lý tính bằng giây) in ra terminal.
-*   Một file hình ảnh trực quan thể hiện kết quả tìm kiếm được lưu tại: `output_test/result_<tên_ảnh_query>.png`.
+## 📤 Output Data
+*   Search time (processing speed in seconds) printed to the terminal.
+*   A visual image file showing the search results saved at: `output_test/result_<query_image_name>.png`.
 
-## 🚀 Cách chạy (How to run)
+## 🚀 How to run
 
-Từ thư mục gốc dự án, chuẩn bị sẵn 1 tấm ảnh và chạy lệnh:
+From the project root directory, prepare an image and run the command:
 
 ```bash
-# Cú pháp
-python src/online/stage5_test_query/test_query.py --image <đường_dẫn_tới_ảnh> --backend <auto|pytorch|cann>
+# Syntax
+python src/online/stage5_test_query/test_query.py --image <path_to_image> --backend <auto|pytorch|cann>
 
-# Ví dụ chạy thực tế
+# Real execution example
 python src/online/stage5_test_query/test_query.py --image test.jpg --backend pytorch
 ```

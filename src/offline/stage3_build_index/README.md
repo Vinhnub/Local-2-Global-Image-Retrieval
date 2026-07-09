@@ -1,24 +1,24 @@
-# Stage 3: Build Index (Xây dựng Từ điển Khoảng cách)
+# Stage 3: Build Index (Distance Dictionary Construction)
 
-## 📌 Chức năng
-Stage 3 là bước chuẩn bị cuối cùng (Offline) trước khi hệ thống có thể tìm kiếm.
-Vì việc tính toán Chamfer Distance (khoảng cách giữa 600 vector của 2 bức ảnh) là cực kỳ tốn kém, Stage 3 sẽ tính toán trước toàn bộ khoảng cách nội bộ giữa các ảnh trong Database với nhau và lưu vào một từ điển (Sparse Lookup).
-Khi có một ảnh Query từ ngoài vào (ở Stage 4 và 5), chúng ta chỉ cần tính Chamfer cho ảnh Query, còn khoảng cách giữa các ảnh Database với nhau sẽ được lôi ra từ Từ điển này, giúp giảm thời gian chạy từ "Vài tiếng" xuống còn "Vài giây".
+## 📌 What it does
+Stage 3 is the final preparation step (Offline) before the system can perform searches.
+Since calculating the Chamfer Distance (the distance between 600 vectors of 2 images) is extremely expensive, Stage 3 precomputes all internal distances between images in the Database and saves them into a dictionary (Sparse Lookup).
+When a Query image comes in (in Stages 4 and 5), we only need to compute the Chamfer distance for the Query image. The distances between Database images are retrieved from this Dictionary, reducing the runtime from "hours" to "seconds".
 
-## 📥 Dữ liệu Đầu vào (Input)
-*   Thư mục đặc trưng cục bộ (Stage 1): `output/stage1/features/.../database/`
+## 📥 Input Data
+*   Local features directory (Stage 1): `output/stage1/features/.../database/`
 
-## 📤 Dữ liệu Đầu ra (Output)
-*   Từ điển dạng pickle: `output/stage3/roxford5k_sparse_sim.pkl` (hoặc rparis6k_sparse_sim.pkl).
+## 📤 Output Data
+*   Dictionary in pickle format: `output/stage3/roxford5k_sparse_sim.pkl` (or rparis6k_sparse_sim.pkl).
 
-## 🚀 Cách chạy (How to run)
+## 🚀 How to run
 
-Từ thư mục gốc dự án, chạy lệnh:
+From the project root directory, run the command:
 
 ```bash
-# Chạy với Backend Tự động (Ưu tiên CANN nếu có, không có dùng PyTorch)
+# Run with Auto Backend (Prioritizes CANN if available, otherwise uses PyTorch)
 python src/offline/stage3_build_index/build_index.py --dataset roxford5k --backend auto
 
-# Hoặc ép buộc chạy bằng PyTorch GPU (Mini-batching 200 ảnh/lần)
+# Or force run with PyTorch GPU (Mini-batching 200 images/time)
 python src/offline/stage3_build_index/build_index.py --dataset roxford5k --backend pytorch
 ```
