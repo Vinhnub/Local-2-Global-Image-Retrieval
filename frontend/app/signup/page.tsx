@@ -5,7 +5,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import toast from "react-hot-toast";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, XCircle } from "lucide-react";
+import { motion, AnimatePresence } from "motion/react";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -26,16 +27,12 @@ export default function SignupPage() {
 
       const res = await api.post( "/api/v1/auth/register", {username, password});
       
-      console.log("res", res)
-
       router.push("/login");
-      
-      toast.success("Sign up successfully")
+      toast.success("Account created successfully");
 
-
-      } catch (err: any) {
-        console.error(err);
-        setErrorPopup(err.response?.data?.detail || "Error when call sign up");
+    } catch (err: any) {
+      console.error(err);
+      setErrorPopup(err.response?.data?.detail || "Error during sign up");
 
     } finally {
       setLoading(false);
@@ -43,35 +40,42 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-950 via-violet-900 to-fuchsia-900 relative text-white px-4 selection:bg-fuchsia-500 selection:text-white">
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-blue-400/20 via-transparent to-transparent opacity-60 pointer-events-none"></div>
+    <div className="min-h-[100dvh] flex items-center justify-center bg-[#F5F5F7] text-[#111111] px-4 selection:bg-black/10 selection:text-black relative overflow-hidden">
+      
+      {/* Soft Ambient Background Elements */}
+      <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] bg-indigo-100 rounded-full mix-blend-multiply filter blur-[100px] opacity-50 pointer-events-none"></div>
 
-      <div className="bg-[#1e1b4b]/80 p-8 rounded-2xl shadow-[0_0_30px_rgba(217,70,239,0.2)] border border-fuchsia-400/30 w-full max-w-[480px] h-auto text-white relative z-10 backdrop-blur-xl">
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+        className="bg-white p-8 sm:p-12 rounded-[2rem] shadow-[0_20px_60px_rgba(0,0,0,0.04)] border border-black/5 w-full max-w-[480px] relative z-10"
+      >
         <Link
-            href="/home"
-            className="absolute top-4 left-4 p-2 text-fuchsia-300 hover:text-white hover:bg-white/10 rounded-full transition-all cursor-pointer"
-            title="Back to home"
-          >
+          href="/home"
+          className="absolute top-6 left-6 p-2 text-black/40 hover:text-black hover:bg-black/5 rounded-full transition-all cursor-pointer"
+          title="Back to home"
+        >
           <ArrowLeft size={20} />
         </Link>
         
-        <div className="text-center mb-8 mt-2">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-tr from-cyan-400 to-blue-600 mb-4 shadow-[0_0_15px_rgba(34,211,238,0.5)] border-2 border-white/20 text-3xl">
-            🏆
+        <div className="text-center mb-10 mt-2">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-[1.25rem] bg-black text-white mb-6 shadow-md border border-black/10">
+            <span className="text-xl font-extrabold tracking-tighter">WC</span>
           </div>
-          <h1 className="text-3xl font-extrabold tracking-tight drop-shadow-md">
+          <h1 className="text-3xl font-bold tracking-tight text-black">
             Join the Club
           </h1>
-          <p className="text-fuchsia-200/80 text-sm mt-2">Create your WC26 account</p>
+          <p className="text-black/50 text-sm mt-2 font-medium">Create your Index 26 account</p>
         </div>
 
-        <div className="space-y-5">
+        <div className="space-y-6">
           <div>
-            <label className="block text-xs font-bold text-fuchsia-300 uppercase tracking-wider mb-1.5 drop-shadow-sm">Username</label>
+            <label className="block text-xs font-bold text-black/70 uppercase tracking-wider mb-2">Username</label>
             <input
               type="text"
               placeholder="Choose a username"
-              className="w-full rounded-xl bg-black/40 border border-white/10 p-3 focus:outline-none focus:border-cyan-400/80 focus:ring-1 focus:ring-cyan-400 transition-all text-sm text-white placeholder-gray-400 shadow-inner"
+              className="w-full rounded-xl bg-[#F5F5F7] border border-transparent p-3.5 focus:outline-none focus:bg-white focus:border-black/20 focus:ring-4 focus:ring-black/5 transition-all text-sm text-black placeholder-black/30 shadow-inner"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               disabled={loading}
@@ -79,11 +83,11 @@ export default function SignupPage() {
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-fuchsia-300 uppercase tracking-wider mb-1.5 drop-shadow-sm">Password</label>
+            <label className="block text-xs font-bold text-black/70 uppercase tracking-wider mb-2">Password</label>
             <input
               type="password"
               placeholder="Create a password"
-              className="w-full rounded-xl bg-black/40 border border-white/10 p-3 focus:outline-none focus:border-cyan-400/80 focus:ring-1 focus:ring-cyan-400 transition-all text-sm text-white placeholder-gray-400 shadow-inner"
+              className="w-full rounded-xl bg-[#F5F5F7] border border-transparent p-3.5 focus:outline-none focus:bg-white focus:border-black/20 focus:ring-4 focus:ring-black/5 transition-all text-sm text-black placeholder-black/30 shadow-inner"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               disabled={loading}
@@ -93,53 +97,58 @@ export default function SignupPage() {
           <button
             onClick={handleSignup}
             disabled={loading}
-            className="w-full bg-gradient-to-r from-cyan-500 to-blue-600 text-white p-3 rounded-xl font-bold hover:from-cyan-400 hover:to-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-[0_0_15px_rgba(34,211,238,0.4)] hover:shadow-[0_0_25px_rgba(34,211,238,0.6)] cursor-pointer mt-4 uppercase tracking-wide"
+            className="w-full bg-black text-white p-4 rounded-xl font-semibold hover:bg-black/90 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-[0_4px_14px_rgba(0,0,0,0.1)] cursor-pointer mt-2"
           >
             {loading ? "Creating..." : "Create Account"}
           </button>
         </div>
 
-        <p className="text-center text-sm text-fuchsia-100/80 mt-6 border-t border-fuchsia-400/20 pt-6">
+        <p className="text-center text-sm text-black/50 mt-8">
           Already have an account?
-          <Link href="/login" className="text-cyan-400 ml-1.5 font-bold hover:text-cyan-300 hover:underline drop-shadow-[0_0_5px_rgba(34,211,238,0.5)] transition-colors">
-            Login
+          <Link href="/login" className="text-black ml-1.5 font-bold hover:underline transition-colors">
+            Log in
           </Link>
         </p>
-
-      </div>
+      </motion.div>
 
       {/* POPUP ERROR STATUS */}
-      {errorPopup && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-[100] flex items-center justify-center animate-fade-in" onClick={() => setErrorPopup(null)}>
-          <div 
-            className="rounded-3xl p-8 w-[380px] flex flex-col items-center shadow-2xl border backdrop-blur-xl relative gap-3 animate-fade-in-up bg-rose-950/80 border-rose-500/40 shadow-[0_0_40px_rgba(225,29,72,0.3)]"
-            onClick={(e) => e.stopPropagation()}
+      <AnimatePresence>
+        {errorPopup && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-white/80 backdrop-blur-xl z-[100] flex items-center justify-center" 
+            onClick={() => setErrorPopup(null)}
           >
-            <div className="flex h-20 w-20 items-center justify-center rounded-full bg-rose-500/20 border-2 border-rose-400/50 drop-shadow-[0_0_15px_rgba(225,29,72,0.5)]">
-              <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-rose-400">
-                <circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/>
-              </svg>
-            </div>
-            
-            <h3 className="font-extrabold text-transparent bg-clip-text text-2xl mt-4 drop-shadow-md text-center"
-                style={{ backgroundImage: 'linear-gradient(to right, #fb7185, #e11d48)' }}>
-              Registration Failed
-            </h3>
-            
-            <p className="text-sm text-center text-white/90 font-medium leading-relaxed px-4">
-              {errorPopup}
-            </p>
-
-            <button 
-              onClick={() => setErrorPopup(null)}
-              className="mt-6 w-full bg-white/10 border border-white/20 text-white py-3 rounded-xl text-sm font-bold hover:bg-white/20 hover:shadow-[0_0_15px_rgba(255,255,255,0.2)] transition-all backdrop-blur-md uppercase tracking-wider cursor-pointer"
+            <motion.div 
+              initial={{ scale: 0.95, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.95, y: 20 }}
+              className="rounded-[2rem] p-8 w-[380px] flex flex-col items-center bg-white border border-black/5 shadow-2xl relative"
+              onClick={(e) => e.stopPropagation()}
             >
-              Try Again
-            </button>
-          </div>
-        </div>
-      )}
+              <XCircle className="h-12 w-12 text-rose-500 mb-4" strokeWidth={1.5} />
+              
+              <h3 className="font-bold text-black text-xl mb-2">
+                Registration Failed
+              </h3>
+              
+              <p className="text-sm text-center text-black/60 font-medium leading-relaxed px-4">
+                {errorPopup}
+              </p>
+
+              <button 
+                onClick={() => setErrorPopup(null)}
+                className="mt-8 w-full bg-[#F5F5F7] border border-black/5 text-black py-3 rounded-xl text-sm font-semibold hover:bg-black/5 transition-all cursor-pointer"
+              >
+                Try Again
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
     </div>
   );
-};
+}

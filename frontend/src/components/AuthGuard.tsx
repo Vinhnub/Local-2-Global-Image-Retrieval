@@ -13,18 +13,26 @@ export default function AuthGuard({
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem("access_token");
+    let token = null;
+    try {
+      token = localStorage.getItem("access_token");
+    } catch (error) {
+      console.warn("localStorage access denied", error);
+    }
 
     const publicRoutes = ["/home", "/", "/login", "/signup"];
-
     const isPublicRoute = publicRoutes.includes(pathname);
 
-    if (!token && !isPublicRoute) {
-      setIsLoading(true);
-      router.replace("/home"); 
-    } else if (token && (pathname === "/login" || pathname === "/signup")) {
-      router.replace("/home");
-    } else {
+    try {
+      if (!token && !isPublicRoute) {
+        setIsLoading(true);
+        router.replace("/home"); 
+      } else if (token && (pathname === "/login" || pathname === "/signup")) {
+        router.replace("/home");
+      } else {
+        setIsLoading(false);
+      }
+    } catch (error) {
       setIsLoading(false);
     }
   }, [pathname, router]);

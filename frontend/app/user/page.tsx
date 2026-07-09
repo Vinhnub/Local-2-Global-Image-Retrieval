@@ -2,11 +2,10 @@
 
 import api from "@/lib/axios";
 import { useEffect, useState } from "react";
-import { Clock, User, Calendar, ArrowLeft, Crown, X, Image as ImageIcon, ChevronLeft, ChevronRight } from "lucide-react";
+import { Clock, User, Calendar, ArrowLeft, Crown, X, Image as ImageIcon, ChevronLeft, ChevronRight, Hash, Activity } from "lucide-react";
 import { useRouter } from "next/navigation";
 import MainHeader from "@/src/components/mainHeader";
-
-// --- INTERFACES ---
+import { motion, AnimatePresence } from "motion/react";
 
 interface HistoryItem {
   _id: string;
@@ -32,7 +31,6 @@ interface HistoryDetail {
   feedback_comment: string;
 }
 
-
 export default function UserProfilePage() {
   const router = useRouter();
 
@@ -40,8 +38,6 @@ export default function UserProfilePage() {
     if (!dateString) return "N/A";
     try {
       const date = new Date(dateString);
-      
-      // Format: 08/07/2026 - 02:42 
       return new Intl.DateTimeFormat('vi-VN', {
         day: '2-digit',
         month: '2-digit',
@@ -49,23 +45,20 @@ export default function UserProfilePage() {
         hour: '2-digit',
         minute: '2-digit',
       }).format(date);
-      
     } catch (error) {
       return "N/A";
     }
   };
-  // History List States
+
   const [historyList, setHistoryList] = useState<HistoryItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Detail Modal States
   const [selectedDetail, setSelectedDetail] = useState<HistoryDetail | null>(null);
   const [isDetailLoading, setIsDetailLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const [activeLightboxIdx, setActiveLightboxIdx] = useState<number | null>(null);
 
-  // Pagination States
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
   const indexOfLastItem = currentPage * itemsPerPage;
@@ -73,7 +66,6 @@ export default function UserProfilePage() {
   const currentItems = historyList.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(historyList.length / itemsPerPage);
 
-  // User LocalStorage Data (Sửa lỗi chính tả "Undifine")
   const [userInfo, setUserInfo] = useState({
     id: "None",
     username: "Undefined",
@@ -109,7 +101,6 @@ export default function UserProfilePage() {
     fetchHistory();
   }, []);
 
-  // Handle viewing specific history details
   const handleViewDetail = async (queryId: number) => {
     setIsModalOpen(true);
     setIsDetailLoading(true);
@@ -130,7 +121,6 @@ export default function UserProfilePage() {
     }
   };
 
-  // Lightbox navigation hooks
   const handlePrevImage = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (selectedDetail?.results && activeLightboxIdx !== null) {
@@ -150,83 +140,93 @@ export default function UserProfilePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-950 via-violet-900 to-fuchsia-900 relative text-white selection:bg-fuchsia-500 selection:text-white">
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-blue-400/20 via-transparent to-transparent opacity-60"></div>
+    <div className="min-h-screen bg-[#F5F5F7] text-[#111111] selection:bg-black/10 selection:text-black font-sans relative overflow-x-hidden">
+      
+      {/* Background Orbs */}
+      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-50 rounded-full mix-blend-multiply filter blur-[100px] opacity-60 pointer-events-none"></div>
       
       <div className="w-full z-50">
         <MainHeader />
       </div>
 
-      <div className="max-w-5xl mx-auto pt-24 pb-12 px-4 sm:px-6 lg:px-8 relative z-10">
-        {/* Back Button */}
+      <div className="max-w-5xl mx-auto pt-32 pb-12 px-4 sm:px-6 lg:px-8 relative z-10">
         <button
           onClick={() => router.push("/home")}
-          className="flex items-center gap-2 text-fuchsia-200 hover:text-white font-medium mb-8 transition-colors group cursor-pointer"
+          className="flex items-center gap-2 text-black/40 hover:text-black font-semibold text-sm mb-8 transition-colors group cursor-pointer bg-white px-4 py-2 rounded-full shadow-sm border border-black/5 w-fit"
         >
-          <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
+          <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
           Back to search
         </button>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* PROFILE CARD */}
-          <div className="lg:col-span-1 bg-white/10 backdrop-blur-md border border-fuchsia-400/30 rounded-2xl p-6 shadow-[0_0_15px_rgba(217,70,239,0.15)] h-fit">
-            <div className="flex flex-col items-center text-center border-b border-fuchsia-400/30 pb-6 mb-6">
-              <div className="w-20 h-20 bg-gradient-to-tr from-fuchsia-500 to-purple-600 rounded-full flex items-center justify-center text-white text-2xl font-bold shadow-[0_0_15px_rgba(217,70,239,0.5)] mb-4 uppercase border-2 border-white/20">
+          <div className="lg:col-span-1 bg-white border border-black/5 rounded-[2rem] p-8 shadow-[0_20px_40px_rgba(0,0,0,0.04)] h-fit">
+            <div className="flex flex-col items-center text-center border-b border-black/5 pb-8 mb-8">
+              <div className="w-24 h-24 bg-black rounded-full flex items-center justify-center text-white text-3xl font-extrabold mb-4 shadow-md uppercase border-4 border-white">
                 {userInfo.username.charAt(0)}
               </div>
-              <h2 className="text-xl font-bold text-white flex items-center gap-1.5 drop-shadow-md">
+              <h2 className="text-xl font-bold text-black flex items-center gap-1.5">
                 {userInfo.is_pro === "true" || userInfo.is_pro === "True" ? (
                   <>
-                    Premium User <Crown size={16} className="text-yellow-400 fill-yellow-400 drop-shadow-[0_0_5px_rgba(250,204,21,0.8)]" />
+                    Premium User <Crown size={16} className="text-yellow-600 fill-yellow-500" />
                   </>
                 ) : (
-                  "Normal User"
+                  "Standard User"
                 )}
               </h2>
             </div>
 
-            <div className="space-y-4">
-              <div className="flex items-center gap-3 text-fuchsia-100 text-sm">
-                <User size={16} className="text-fuchsia-300" />
-                <span>Full Name: <strong className="text-white">{userInfo.username}</strong></span>
+            <div className="space-y-5">
+              <div className="flex items-center gap-3 text-black/60 text-sm font-medium">
+                <div className="w-8 h-8 rounded-full bg-black/5 flex items-center justify-center text-black">
+                  <User size={16} />
+                </div>
+                <span>Full Name: <strong className="text-black ml-1">{userInfo.username}</strong></span>
               </div>
-              <div className="flex items-center gap-3 text-fuchsia-100 text-sm">
-                <Calendar size={16} className="text-fuchsia-300" />
-                <span>Joined: <strong className="text-white">{formatDate(userInfo.created_at || "None")}</strong></span>
+              <div className="flex items-center gap-3 text-black/60 text-sm font-medium">
+                <div className="w-8 h-8 rounded-full bg-black/5 flex items-center justify-center text-black">
+                  <Calendar size={16} />
+                </div>
+                <span>Joined: <strong className="text-black ml-1">{formatDate(userInfo.created_at || "None")}</strong></span>
               </div>
             </div>
           </div>
 
           {/* HISTORY LIST */}
-          <div className="lg:col-span-2 bg-white/10 backdrop-blur-md border border-fuchsia-400/30 rounded-2xl p-6 shadow-[0_0_15px_rgba(217,70,239,0.15)] flex flex-col justify-between min-h-[400px]">
+          <div className="lg:col-span-2 bg-white border border-black/5 rounded-[2rem] p-8 shadow-[0_20px_40px_rgba(0,0,0,0.04)] flex flex-col justify-between min-h-[500px]">
             <div>
-              <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-2 drop-shadow-md">
-                <Clock size={18} className="text-fuchsia-400" /> Search History
+              <h3 className="text-xl font-bold text-black mb-8 flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-black/5 flex items-center justify-center text-black border border-black/5">
+                  <Clock size={18} />
+                </div>
+                Search History
               </h3>
 
               {isLoading ? (
                 <div className="flex justify-center items-center py-12">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-fuchsia-400"></div>
+                  <div className="animate-spin rounded-full h-8 w-8 border-4 border-black/10 border-t-black"></div>
                 </div>
               ) : historyList.length === 0 ? (
-                <p className="text-fuchsia-200 text-center py-8">No search history found.</p>
+                <div className="bg-[#F5F5F7] rounded-2xl p-8 text-center text-black/40 font-medium">
+                  No search history found.
+                </div>
               ) : (
-                <div className="divide-y divide-fuchsia-400/20">
+                <div className="flex flex-col gap-3">
                   {currentItems.map((item) => (
                     <div
                       key={item._id || item.id}
-                      className="py-4 flex items-center justify-between hover:bg-white/10 px-3 rounded-xl transition-colors cursor-pointer group"
+                      className="p-4 flex items-center justify-between bg-white border border-black/5 hover:border-black/10 rounded-[1.25rem] transition-all cursor-pointer group shadow-sm hover:shadow-md"
                       onClick={() => handleViewDetail(Number(item.id || item._id))}
                     >
                       <div>
-                        <p className="font-semibold text-white group-hover:text-fuchsia-300 transition-colors drop-shadow-sm">
+                        <p className="font-bold text-black group-hover:text-black/70 transition-colors text-sm">
                           {item.search_term || "Visual Query Search"}
                         </p>
-                        <p className="text-xs text-fuchsia-200 mt-1">
+                        <p className="text-xs text-black/40 mt-1 font-medium">
                           {formatDate(item.date ?? item.created_at ?? "")}
                         </p>
                       </div>
-                      <span className="text-xs font-medium text-white bg-fuchsia-600/50 border border-fuchsia-400/50 px-3 py-1.5 rounded-full group-hover:bg-fuchsia-500/80 group-hover:shadow-[0_0_10px_rgba(217,70,239,0.5)] transition-all">
+                      <span className="text-xs font-bold text-black bg-[#F5F5F7] px-4 py-2 rounded-full group-hover:bg-black group-hover:text-white transition-all">
                         View Results
                       </span>
                     </div>
@@ -237,25 +237,25 @@ export default function UserProfilePage() {
 
             {/* Pagination Controls */}
             {!isLoading && historyList.length > itemsPerPage && (
-              <div className="flex items-center justify-between border-t border-fuchsia-400/30 pt-4 mt-6">
-                <span className="text-sm text-fuchsia-200">
-                  Page <strong className="text-white">{currentPage}</strong> on <strong className="text-white">{totalPages}</strong>
+              <div className="flex items-center justify-between border-t border-black/5 pt-6 mt-8">
+                <span className="text-xs font-medium text-black/40 uppercase tracking-widest">
+                  Page <strong className="text-black">{currentPage}</strong> / <strong className="text-black">{totalPages}</strong>
                 </span>
 
                 <div className="flex gap-2">
                   <button
                     onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                     disabled={currentPage === 1}
-                    className="px-3 py-1.5 text-sm font-medium text-white bg-white/10 rounded-lg hover:bg-white/20 disabled:opacity-40 disabled:cursor-not-allowed transition-colors border border-white/20"
+                    className="px-4 py-2 text-xs font-bold text-black bg-[#F5F5F7] rounded-full hover:bg-black/10 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                   >
-                    pre
+                    Prev
                   </button>
                   <button
                     onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
                     disabled={currentPage === totalPages}
-                    className="px-3 py-1.5 text-sm font-medium text-white bg-gradient-to-r from-fuchsia-600 to-purple-600 rounded-lg hover:from-fuchsia-500 hover:to-purple-500 disabled:opacity-40 disabled:cursor-not-allowed transition-colors shadow-md"
+                    className="px-4 py-2 text-xs font-bold text-white bg-black rounded-full hover:bg-black/80 disabled:opacity-40 disabled:cursor-not-allowed transition-colors shadow-md"
                   >
-                    next
+                    Next
                   </button>
                 </div>
               </div>
@@ -265,154 +265,168 @@ export default function UserProfilePage() {
       </div>
 
       {/* --- HISTORY DETAIL MODAL --- */}
-      {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md p-4 animate-fade-in">
-          <div className="bg-[#1e1b4b]/90 rounded-2xl border border-fuchsia-400/30 max-w-3xl w-full max-h-[85vh] overflow-y-auto shadow-[0_0_30px_rgba(217,70,239,0.3)] flex flex-col text-white backdrop-blur-xl">
-            {/* Modal Header */}
-            <div className="p-6 border-b border-fuchsia-400/30 flex items-center justify-between sticky top-0 bg-[#1e1b4b]/95 z-10 backdrop-blur-md">
-              <h3 className="text-xl font-bold text-white drop-shadow-md">Search Session Details</h3>
-              <button
-                onClick={() => setIsModalOpen(false)}
-                className="p-1.5 rounded-lg text-fuchsia-300 hover:bg-white/10 hover:text-white transition-colors cursor-pointer"
-              >
-                <X size={20} />
-              </button>
-            </div>
+      <AnimatePresence>
+        {isModalOpen && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-white/80 backdrop-blur-xl p-4"
+          >
+            <motion.div 
+              initial={{ scale: 0.95, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.95, y: 20 }}
+              className="bg-white rounded-[2rem] border border-black/5 max-w-4xl w-full max-h-[85vh] overflow-hidden flex flex-col text-black shadow-2xl"
+            >
+              <div className="p-6 border-b border-black/5 flex items-center justify-between bg-[#F5F5F7]/80 backdrop-blur-md">
+                <h3 className="text-lg font-bold text-black">Session Detail</h3>
+                <button
+                  onClick={() => setIsModalOpen(false)}
+                  className="p-2 rounded-full text-black/40 hover:bg-black/10 hover:text-black transition-colors cursor-pointer bg-white shadow-sm border border-black/5"
+                >
+                  <X size={18} />
+                </button>
+              </div>
 
-            {/* Modal Content */}
-            <div className="p-6 space-y-6 flex-1">
-              {isDetailLoading ? (
-                <div className="flex flex-col justify-center items-center py-20 gap-3">
-                  <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-fuchsia-400"></div>
-                  <p className="text-fuchsia-200 text-sm">Fetching search results...</p>
-                </div>
-              ) : selectedDetail ? (
-                <>
-                  {/* Query Info Meta */}
-                  <div className="grid grid-cols-2 gap-4 bg-white/5 border border-white/10 p-4 rounded-xl text-sm text-fuchsia-100">
-                    <div>
-                      <span className="font-medium text-fuchsia-300 block mb-0.5">Top-K Requested:</span>
-                      <span className="font-semibold text-white">{selectedDetail.top_k_requested}</span>
-                    </div>
-                    <div>
-                      <span className="font-medium text-fuchsia-300 block mb-0.5">Executed At:</span>
-                      <span className="font-semibold text-white text-xs">{formatDate(selectedDetail.created_at)} </span>
-                    </div>
+              <div className="p-8 overflow-y-auto flex-1 space-y-8 bg-white">
+                {isDetailLoading ? (
+                  <div className="flex flex-col justify-center items-center py-20 gap-4">
+                    <div className="animate-spin rounded-full h-10 w-10 border-4 border-black/10 border-t-black"></div>
+                    <p className="text-black/40 text-sm font-medium">Fetching details...</p>
                   </div>
+                ) : selectedDetail ? (
+                  <>
+                    <div className="flex gap-4">
+                      <div className="flex-1 bg-[#F5F5F7] border border-black/5 p-5 rounded-[1.5rem]">
+                        <span className="font-bold text-black/40 text-xs uppercase tracking-widest block mb-1">Top-K</span>
+                        <span className="font-bold text-black text-xl">{selectedDetail.top_k_requested}</span>
+                      </div>
+                      <div className="flex-1 bg-[#F5F5F7] border border-black/5 p-5 rounded-[1.5rem]">
+                        <span className="font-bold text-black/40 text-xs uppercase tracking-widest block mb-1">Date</span>
+                        <span className="font-bold text-black text-lg">{formatDate(selectedDetail.created_at)} </span>
+                      </div>
+                    </div>
 
-                  {/* Image Grid Area */}
-                  <div>
-                    <h4 className="text-sm font-bold text-fuchsia-400 uppercase tracking-wider mb-3">Returned Images</h4>
-                    {!selectedDetail.results || selectedDetail.results.length === 0 ? (
-                      <p className="text-sm text-fuchsia-200/70">No matching image metrics returned.</p>
-                    ) : (
-                      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-                        {selectedDetail.results.map((item, index) => (
-                          <div
-                            key={item.id || index}
-                            className="relative group overflow-hidden rounded-xl border border-white/10 bg-black/40 cursor-pointer shadow-sm hover:shadow-[0_0_15px_rgba(217,70,239,0.5)] hover:border-fuchsia-400/50 transition-all"
-                            onClick={() => setActiveLightboxIdx(index)}
-                          >
-                            <img
-                              src={item.image_base64}
-                              alt={`Result view ${index}`}
-                              className="w-full h-40 object-cover group-hover:scale-105 transition-transform duration-300"
-                            />
-                            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-1.5 text-white">
-                              <ImageIcon size={20} />
-                              <span className="text-xs font-medium">Click to Zoom</span>
-                            </div>
-                            {item.score !== undefined && (
-                              <div className="absolute bottom-2 left-2 bg-black/70 backdrop-blur-md text-[10px] text-fuchsia-200 px-2 py-0.5 rounded border border-white/10 font-mono">
-                                Score: {item.score.toFixed(4)}
+                    <div>
+                      <h4 className="text-xs font-bold text-black/40 uppercase tracking-widest mb-4">Results</h4>
+                      {!selectedDetail.results || selectedDetail.results.length === 0 ? (
+                        <div className="bg-[#F5F5F7] p-8 rounded-[1.5rem] text-center text-sm font-medium text-black/40">
+                          No matching image metrics returned.
+                        </div>
+                      ) : (
+                        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+                          {selectedDetail.results.map((item, index) => (
+                            <div
+                              key={item.id || index}
+                              className="relative group overflow-hidden rounded-2xl bg-black/5 cursor-pointer hover:shadow-lg transition-all border border-black/5"
+                              onClick={() => setActiveLightboxIdx(index)}
+                            >
+                              <img
+                                src={item.image_base64}
+                                alt={`Result view ${index}`}
+                                className="w-full h-32 object-cover transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-110"
+                              />
+                              <div className="absolute inset-0 bg-white/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center gap-1.5 text-black backdrop-blur-sm">
+                                <ImageIcon size={20} />
+                                <span className="text-[10px] font-bold uppercase tracking-widest">Zoom</span>
                               </div>
-                            )}
-                          </div>
-                        ))}
+                              {item.score !== undefined && (
+                                <div className="absolute bottom-2 left-2 bg-white/90 backdrop-blur-md text-[10px] font-bold text-black px-2 py-0.5 rounded shadow-sm border border-black/5 font-mono">
+                                  {(item.score * 100).toFixed(1)}%
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    {(selectedDetail.feedback_rating > 0 || selectedDetail.feedback_comment) && (
+                      <div className="border-t border-black/5 pt-8">
+                        <h4 className="text-xs font-bold text-black/40 uppercase tracking-widest mb-4">Feedback</h4>
+                        <div className="bg-[#F5F5F7] rounded-[1.5rem] p-6 border border-black/5">
+                          <p className="text-sm font-bold text-yellow-600 mb-2">
+                            Rating: {"⭐".repeat(selectedDetail.feedback_rating)}
+                          </p>
+                          {selectedDetail.feedback_comment && (
+                            <p className="text-sm text-black/70 font-medium italic">
+                              "{selectedDetail.feedback_comment}"
+                            </p>
+                          )}
+                        </div>
                       </div>
                     )}
-                  </div>
-
-                  {/* Feedback Section */}
-                  {(selectedDetail.feedback_rating > 0 || selectedDetail.feedback_comment) && (
-                    <div className="border-t border-fuchsia-400/30 pt-6">
-                      <h4 className="text-sm font-bold text-fuchsia-400 uppercase tracking-wider mb-3">Your Feedback</h4>
-                      <div className="bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-fuchsia-400/20">
-                        <p className="text-sm font-semibold text-yellow-400 drop-shadow-sm">
-                          Rating: {"⭐".repeat(selectedDetail.feedback_rating)}
-                        </p>
-                        {selectedDetail.feedback_comment && (
-                          <p className="text-sm text-fuchsia-100 mt-1.5 italic">
-                            "{selectedDetail.feedback_comment}"
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  )}
-                </>
-              ) : (
-                <p className="text-center text-fuchsia-300/70">Failed to render detail metadata.</p>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
+                  </>
+                ) : (
+                  <p className="text-center text-black/40 font-medium">Failed to render detail metadata.</p>
+                )}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* --- LIGHTBOX OVERLAY --- */}
-      {activeLightboxIdx !== null && selectedDetail?.results && (
-        <div
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-xs select-none"
-          onClick={() => setActiveLightboxIdx(null)}
-        >
-          {/* Close Trigger Button */}
-          <button
-            className="absolute top-6 right-6 text-white/70 hover:text-white bg-white/10 p-2.5 rounded-full transition-colors cursor-pointer z-50"
+      <AnimatePresence>
+        {activeLightboxIdx !== null && selectedDetail?.results && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-white/95 backdrop-blur-xl select-none"
             onClick={() => setActiveLightboxIdx(null)}
           >
-            <X size={24} />
-          </button>
+            <button
+              className="absolute top-6 right-6 text-black/40 hover:text-black bg-black/5 hover:bg-black/10 p-3 rounded-full transition-colors cursor-pointer z-50 border border-black/5"
+              onClick={() => setActiveLightboxIdx(null)}
+            >
+              <X size={20} />
+            </button>
 
-          {/* Previous Selection Action */}
-          <button
-            className="absolute left-6 p-3.5 rounded-full bg-white/10 hover:bg-white/20 text-white transition-all cursor-pointer hover:scale-105 active:scale-95"
-            onClick={handlePrevImage}
-          >
-            <ChevronLeft size={32} />
-          </button>
+            <button
+              className="absolute left-6 p-4 rounded-full bg-black/5 hover:bg-black/10 text-black transition-all cursor-pointer hover:scale-105 active:scale-95 border border-black/5"
+              onClick={handlePrevImage}
+            >
+              <ChevronLeft size={24} />
+            </button>
 
-          {/* Display Dynamic Main Image Wrapper */}
-          <div
-            className="max-w-[85vw] max-h-[85vh] flex flex-col items-center justify-center gap-3"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <img
-              src={selectedDetail.results[activeLightboxIdx].image_base64}
-              alt={`Zoomed item view ${activeLightboxIdx}`}
-              className="max-w-full max-h-[78vh] object-contain rounded-lg shadow-2xl transition-all duration-300"
-            />
+            <div
+              className="max-w-[85vw] max-h-[85vh] flex flex-col items-center justify-center gap-4 p-4"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="p-2 rounded-[2rem] bg-black/5 ring-1 ring-black/5 shadow-2xl">
+                <img
+                  src={selectedDetail.results[activeLightboxIdx].image_base64}
+                  alt={`Zoomed item view ${activeLightboxIdx}`}
+                  className="max-w-full max-h-[75vh] object-contain rounded-[1.5rem] bg-white transition-all duration-300"
+                />
+              </div>
 
-            {/* Context Meta Subtext */}
-            <div className="text-white/80 text-sm flex items-center gap-4 bg-black/40 px-4 py-1.5 rounded-full backdrop-blur-md">
-              <span className="font-medium">
-                {activeLightboxIdx + 1} / {selectedDetail.results.length}
-              </span>
-              {selectedDetail.results[activeLightboxIdx].score !== undefined && (
-                <span className="bg-blue-600 px-2.5 py-0.5 rounded text-xs font-mono">
-                  Score: {selectedDetail.results[activeLightboxIdx].score?.toFixed(4)}
+              <div className="text-black text-xs font-bold uppercase tracking-widest flex items-center gap-4 bg-white px-5 py-2.5 rounded-full border border-black/5 shadow-sm">
+                <span>
+                  {activeLightboxIdx + 1} / {selectedDetail.results.length}
                 </span>
-              )}
+                {selectedDetail.results[activeLightboxIdx].score !== undefined && (
+                  <span className="text-black/40">|</span>
+                )}
+                {selectedDetail.results[activeLightboxIdx].score !== undefined && (
+                  <span className="font-mono bg-black/5 px-2 py-1 rounded">
+                    {(selectedDetail.results[activeLightboxIdx].score! * 100).toFixed(1)}% Match
+                  </span>
+                )}
+              </div>
             </div>
-          </div>
 
-          {/* Next Selection Action */}
-          <button
-            className="absolute right-6 p-3.5 rounded-full bg-white/10 hover:bg-white/20 text-white transition-all cursor-pointer hover:scale-105 active:scale-95"
-            onClick={handleNextImage}
-          >
-            <ChevronRight size={32} />
-          </button>
-        </div>
-      )}
+            <button
+              className="absolute right-6 p-4 rounded-full bg-black/5 hover:bg-black/10 text-black transition-all cursor-pointer hover:scale-105 active:scale-95 border border-black/5"
+              onClick={handleNextImage}
+            >
+              <ChevronRight size={24} />
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

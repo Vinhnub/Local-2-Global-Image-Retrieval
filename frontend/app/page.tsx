@@ -2,11 +2,13 @@
 
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
+import { motion } from "motion/react";
+import { ArrowUpRight } from "lucide-react";
 
 const BACKGROUND_IMAGES = [
   "/bg_wc_2026.jpg",
   "/bg_wc_2026_2.jpg",
-  "/bg_wc_2026_3.jpg" 
+  "/bg_wc_2026_3.jpg"
 ];
 
 const WelcomePage = () => {
@@ -17,7 +19,7 @@ const WelcomePage = () => {
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentImageIndex((prevIndex) => (prevIndex + 1) % BACKGROUND_IMAGES.length);
-    }, 1000);
+    }, 4000); 
 
     return () => clearInterval(interval);
   }, []);
@@ -28,89 +30,72 @@ const WelcomePage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-indigo-950 flex flex-col justify-center items-center text-white p-6 relative overflow-hidden selection:bg-fuchsia-500 selection:text-white">
+    <div className="min-h-[100dvh] w-full flex flex-col md:flex-row bg-[#F5F5F7] text-black overflow-hidden">
       
-      {/* Khu vực ảnh nền chạy lần lượt */}
-      <div className="absolute inset-0 z-0 select-none pointer-events-none">
-        {BACKGROUND_IMAGES.map((src, index) => {
-          const isActive = index === currentImageIndex;
-          return (
-            <img
-              key={src}
-              src={src}
-              alt={`World Cup 2026 Background ${index + 1}`}
-              className="absolute inset-0 w-full h-full object-cover object-center transition-opacity duration-1000 ease-in-out"
-              style={{
-                opacity: isActive ? 0.4 : 0,
-                zIndex: isActive ? 10 : 0,
-              }}
-            />
-          );
-        })}
-        {/* Gradient overlay phù hợp với theme WC26 Dark */}
-        <div className="absolute inset-0 bg-gradient-to-br from-indigo-950/90 via-violet-900/80 to-fuchsia-900/60 z-20"></div>
-      </div>
-      
-      {/* Ambient Orbs */}
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-fuchsia-500/20 rounded-full blur-[100px] pointer-events-none z-10 animate-blob"></div>
-      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-cyan-500/20 rounded-full blur-[100px] pointer-events-none z-10 animate-blob animation-delay-2000"></div>
+      {/* Left side: Editorial Typography */}
+      <div className="w-full md:w-1/2 min-h-[50dvh] md:min-h-screen flex flex-col justify-center px-8 md:px-16 lg:px-24 py-12 z-20">
+        <motion.div 
+          initial={{ opacity: 0, y: 32 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+          className="max-w-xl"
+        >
+          {/* Eyebrow badge */}
+          <div className="mb-8 inline-flex items-center rounded-full px-3 py-1 text-[10px] uppercase tracking-[0.2em] font-bold border border-black/10 text-black/60 bg-white shadow-sm">
+            FIFA World Cup 2026
+          </div>
 
-      {/* Main content */}
-      <div className="max-w-3xl text-center z-30 flex flex-col items-center gap-6 animate-fade-in-up bg-white/5 p-12 rounded-3xl backdrop-blur-md border border-white/10 shadow-[0_0_30px_rgba(217,70,239,0.15)] mt-10">
+          <h1 className="text-5xl lg:text-7xl font-sans tracking-tighter leading-[1.1] mb-6 font-medium text-black">
+            Visual Search <br />
+            <span className="text-black/30">Architecture.</span>
+          </h1>
 
-        {/* World Cup 2026 badge */}
-        <span className="px-5 py-2 rounded-full bg-white/10 text-fuchsia-200 text-sm font-bold tracking-widest uppercase border border-fuchsia-400/30 shadow-[0_0_10px_rgba(217,70,239,0.3)] backdrop-blur-sm">
-          ⚽ FIFA World Cup 2026
-        </span>
+          <p className="text-lg text-black/60 max-w-[45ch] leading-relaxed mb-12">
+            A specialized retrieval engine. Upload any match frame to index, identify, and recall iconic moments from the global stage instantly.
+          </p>
 
-        {/* Title */}
-        <h1 className="text-5xl md:text-7xl font-black tracking-tight text-white mt-2 leading-tight drop-shadow-lg">
-          Image Search <br />
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-400 via-yellow-400 to-cyan-400 animate-text-gradient drop-shadow-md">
-            Content-Based Retrieval
-          </span>
-        </h1>
-
-        {/* Description */}
-        <p className="text-fuchsia-100/80 text-lg md:text-xl max-w-xl font-medium leading-relaxed">
-          A smart search system that helps you find moments, matches, and standout images from the{" "}
-          <strong className="text-white">2026 World Cup</strong> using advanced image
-          processing technology.
-        </p>
-
-        {/* Get Started button */}
-        <div className="mt-8">
           <button
             onClick={handleGetStarted}
             disabled={isNavigating}
-            className="group relative px-10 py-4 bg-gradient-to-r from-fuchsia-600 to-purple-600 hover:from-fuchsia-500 hover:to-purple-500 text-white font-bold rounded-2xl shadow-[0_0_20px_rgba(217,70,239,0.5)] hover:shadow-[0_0_30px_rgba(217,70,239,0.7)] transition-all duration-300 transform hover:-translate-y-1 active:translate-y-0 disabled:opacity-50 flex items-center gap-3 text-xl uppercase tracking-wide cursor-pointer"
+            className="group relative flex items-center gap-4 bg-black text-white px-8 py-4 rounded-full font-medium text-sm tracking-wide transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] hover:shadow-[0_10px_30px_rgba(0,0,0,0.2)] active:scale-[0.98] disabled:opacity-50"
           >
-            {isNavigating ? (
-              <>
-                <div className="h-6 w-6 rounded-full border-2 border-white border-t-transparent animate-spin"></div>
-                Connecting...
-              </>
-            ) : (
-              <>
-                Get Started
-                <svg
-                  className="w-6 h-6 group-hover:translate-x-1.5 transition-transform"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth={3}
-                  viewBox="0 0 24 24"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-                </svg>
-              </>
+            {isNavigating ? "Connecting..." : "Initialize Engine"}
+            
+            {!isNavigating && (
+              <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center transition-transform duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:translate-x-1 group-hover:-translate-y-[1px] group-hover:scale-105 group-hover:bg-white/20">
+                <ArrowUpRight className="w-4 h-4 text-white" />
+              </div>
             )}
           </button>
-        </div>
+        </motion.div>
       </div>
 
-      {/* Footer */}
-      <div className="absolute bottom-6 text-fuchsia-200/40 text-sm tracking-widest uppercase font-semibold z-30">
-        © 2026 WC Image Search Engine
+      {/* Right side: Cinematic Image Viewer */}
+      <div className="w-full md:w-1/2 min-h-[50dvh] md:min-h-screen relative overflow-hidden bg-white">
+        {/* Images */}
+        <div className="absolute inset-0 z-0 bg-white">
+          {BACKGROUND_IMAGES.map((src, index) => {
+            const isActive = index === currentImageIndex;
+            return (
+              <img
+                key={src}
+                src={src}
+                alt={`Archive ${index + 1}`}
+                className="absolute inset-0 w-full h-full object-cover object-center transition-all duration-[3000ms] ease-[cubic-bezier(0.16,1,0.3,1)]"
+                style={{
+                  opacity: isActive ? 0.8 : 0,
+                  transform: isActive ? "scale(1.02)" : "scale(1.1)",
+                  filter: isActive ? "blur(0px) grayscale(20%)" : "blur(10px) grayscale(100%)",
+                  zIndex: isActive ? 5 : 0,
+                }}
+              />
+            );
+          })}
+        </div>
+
+        {/* Gradient fade to blend with left side on mobile */}
+        <div className="absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-[#F5F5F7] to-transparent z-10 hidden md:block"></div>
+        <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-[#F5F5F7] to-transparent z-10 block md:hidden"></div>
       </div>
     </div>
   );

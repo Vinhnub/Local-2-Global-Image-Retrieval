@@ -1,8 +1,9 @@
 "use client";
 
-import { LogIn, LogOut, Crown, NotebookPen, UserRound } from "lucide-react";
+import { LogIn, LogOut, Crown, UserRound } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { motion, AnimatePresence } from "motion/react";
 
 interface UserInfo {
   username: string;
@@ -14,8 +15,6 @@ const MainHeader = () => {
   const [user, setUser] = useState<UserInfo | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
 
-  // Read auth state from localStorage on mount, and keep it in sync
-  // if it changes in another tab (login/logout elsewhere).
   useEffect(() => {
     const loadUser = () => {
       const token = localStorage.getItem("access_token");
@@ -34,7 +33,6 @@ const MainHeader = () => {
     };
 
     loadUser();
-
     window.addEventListener("storage", loadUser);
     return () => window.removeEventListener("storage", loadUser);
   }, []);
@@ -45,88 +43,97 @@ const MainHeader = () => {
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 w-full bg-black/30 shadow-[0_4px_30px_rgba(0,0,0,0.1)] border-b border-white/10 backdrop-blur-lg">
-      <div className="w-full px-6 py-3 flex items-center justify-between">
-
+    <div className="fixed top-0 left-0 right-0 z-50 flex justify-center pt-6 px-4 pointer-events-none">
+      <motion.header 
+        initial={{ y: -20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+        className="pointer-events-auto flex items-center justify-between gap-6 sm:gap-12 px-6 py-3 rounded-full bg-white/80 backdrop-blur-2xl border border-black/5 shadow-[0_8px_32px_rgba(0,0,0,0.08)] w-full max-w-5xl"
+      >
         {/* Logo */}
         <div
           onClick={() => router.push("/")}
-          className="flex items-center gap-3 cursor-pointer group"
+          className="flex items-center gap-3 cursor-pointer group px-2"
         >
-          <div>
-            <h1 className="text-2xl font-extrabold tracking-tight flex items-center gap-2 drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]">
-              <span className="text-2xl group-hover:scale-110 transition-transform duration-300">⚽</span>
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-400 via-yellow-400 to-cyan-400 animate-text-gradient drop-shadow-sm">
-                FIFA World Cup 2026
-              </span>
-            </h1>
-            <p className="text-[11px] font-semibold text-fuchsia-200/80 uppercase tracking-widest mt-0.5 group-hover:text-fuchsia-100 transition-colors ml-9">
+          <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-600 to-cyan-500 flex items-center justify-center shadow-md border border-black/5">
+            <span className="text-[10px] font-bold text-white drop-shadow-sm">WC26</span>
+          </div>
+          <div className="flex flex-col">
+            <span className="text-sm font-bold tracking-tight text-black group-hover:text-black/70 transition-colors">
+              FIFA World Cup
+            </span>
+            <span className="text-[10px] font-semibold text-black/40 uppercase tracking-widest">
               Image Retrieval
-            </p>
+            </span>
           </div>
         </div>
 
         <div className="flex flex-row items-center gap-3">
-
-          {/* Only render auth-dependent UI after we've checked localStorage,
-              to avoid a flash of the wrong state on load */}
           {isLoaded && (
-            <>
-              <button
-                onClick={() => router.push("/uppro")}
-                className={`flex items-center gap-1.5 bg-gradient-to-r from-amber-200 to-yellow-400 text-yellow-950 border border-yellow-300 px-4 py-2 rounded-lg text-sm font-bold hover:scale-105 transition-all duration-300 shadow-[0_0_15px_rgba(250,204,21,0.4)] hover:shadow-[0_0_25px_rgba(250,204,21,0.6)] ${
-                  !user || user.isPro ? "hidden" : ""
-                }`}
-              >
-                <Crown
-                  size={16}
-                  className={user?.isPro ?"hidden":"text-yellow-800 fill-yellow-800"}
-                />
-                Update Pro !
-              </button>
+            <AnimatePresence mode="popLayout">
+              {/* Upgrade Pro Button - Made much more prominent and always visible for non-pro logged in users */}
+              {user && !user.isPro && (
+                <motion.button
+                  key="pro"
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  onClick={() => router.push("/uppro")}
+                  className="flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold bg-gradient-to-r from-amber-400 to-yellow-500 text-yellow-950 border border-yellow-400/50 hover:shadow-[0_4px_15px_rgba(251,191,36,0.4)] active:scale-[0.98] transition-all duration-300"
+                >
+                  <Crown size={14} className="text-yellow-900 fill-yellow-900" />
+                  Upgrade PRO
+                </motion.button>
+              )}
 
               {user ? (
-                <div className="flex flex-row gap-3">
-                  {/* Username / profile link */}
+                <motion.div key="user" className="flex items-center gap-2 ml-2"
+                  initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+                >
                   <button
                     onClick={() => router.push("/user")}
-                    className="flex items-center gap-2 bg-white/10 text-white px-4 py-2 rounded-lg text-sm font-semibold shadow-sm border border-white/20 hover:bg-white/20 hover:shadow-[0_0_15px_rgba(255,255,255,0.2)] transition-all duration-300 cursor-pointer backdrop-blur-md"
+                    className="flex items-center justify-center gap-2 px-4 py-2 rounded-full bg-black/5 hover:bg-black/10 transition-colors border border-black/5"
                     title="Profile"
                   >
-                    <UserRound size={16} className="text-fuchsia-300" />
-                    <span className="max-w-[140px] truncate drop-shadow-sm">{user.username}</span>
+                    <UserRound size={14} className="text-black" />
+                    <span className="text-xs font-semibold text-black max-w-[100px] truncate">{user.username}</span>
                     {user.isPro && (
-                      <span className="flex items-center gap-1 text-[10px] font-bold text-yellow-950 bg-yellow-400 px-1.5 py-0.5 rounded-full border border-yellow-200 shadow-[0_0_10px_rgba(250,204,21,0.5)]">
-                        <Crown size={10} className="fill-yellow-900" />
-                        PRO
+                      <span className="ml-1 flex items-center gap-1 text-[9px] font-bold text-yellow-900 bg-yellow-400 px-1.5 py-0.5 rounded-full">
+                        <Crown size={10} className="fill-yellow-900" /> PRO
                       </span>
                     )}
                   </button>
-
-                  {/* Logout */}
                   <button
                     onClick={handleLogout}
-                    className="flex items-center gap-2 bg-white/10 text-fuchsia-200 border border-white/10 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-red-500/80 hover:text-white hover:border-red-400 hover:shadow-[0_0_15px_rgba(239,68,68,0.5)] transition-all duration-300 backdrop-blur-md"
+                    className="flex items-center justify-center gap-1.5 px-4 py-2 rounded-full bg-white hover:bg-red-50 hover:text-red-600 text-black/60 font-medium text-xs transition-colors border border-black/10 shadow-sm"
+                    title="Log Out"
                   >
-                    <LogOut size={16} />
-                    Log Out
+                    <LogOut size={14} />
+                    Logout
                   </button>
-                </div>
+                </motion.div>
               ) : (
-                <button
-                  onClick={() => router.push("/login")}
-                  className="flex items-center gap-2 bg-gradient-to-r from-fuchsia-600 to-purple-600 text-white border border-fuchsia-400/50 px-5 py-2 rounded-lg text-sm font-semibold shadow-[0_0_15px_rgba(217,70,239,0.4)] hover:scale-105 hover:shadow-[0_0_25px_rgba(217,70,239,0.6)] transition-all duration-300"
-                >
-                  <LogIn size={16} />
-                  Log In
-                </button>
+                <motion.div key="auth" className="flex items-center gap-2 ml-2" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                  <button
+                    onClick={() => router.push("/signup")}
+                    className="hidden sm:flex items-center gap-2 px-5 py-2 rounded-full text-xs font-medium text-black hover:bg-black/5 transition-all duration-300"
+                  >
+                    Sign Up
+                  </button>
+                  <button
+                    onClick={() => router.push("/login")}
+                    className="flex items-center gap-2 px-6 py-2 rounded-full text-xs font-bold bg-black text-white shadow-md hover:bg-black/80 hover:shadow-lg active:scale-[0.98] transition-all duration-300"
+                  >
+                    <LogIn size={14} />
+                    Log In
+                  </button>
+                </motion.div>
               )}
-            </>
+            </AnimatePresence>
           )}
         </div>
-
-      </div>
-    </header>
+      </motion.header>
+    </div>
   );
 };
 
