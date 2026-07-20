@@ -2,11 +2,13 @@
 import MainHeader from "@/src/components/mainHeader";
 import UploadFile from "@/src/components/pageComponents/UploadFile";
 import { useState } from "react";
+import RetrievalResult3D from "@/src/components/pageComponents/RetrievalResult3D";
 import RetrievalResult from "@/src/components/pageComponents/RetrievalResult";
 import { motion } from "motion/react";
 
 export default function Home() {
     const [retrievalImage, setRetrievalImage] = useState<any[]>([]);
+    const [viewMode, setViewMode] = useState<"2d" | "3d">("3d");
     return (
       <div className="flex flex-col w-full min-h-[100dvh] font-sans relative bg-[#F5F5F7] text-[#111111] selection:bg-black/10 selection:text-black">        
         
@@ -40,9 +42,32 @@ export default function Home() {
                 initial={{ opacity: 0, y: 40 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-                className="w-full mt-16"
+                className="w-full mt-16 flex flex-col gap-6"
               >
-                <RetrievalResult retrievalImage={retrievalImage as any}/>
+                <div className="flex justify-center mb-2">
+                  <div className="bg-black/5 p-1 rounded-full inline-flex relative shadow-inner">
+                    <button 
+                      onClick={() => setViewMode("3d")}
+                      className={`relative z-10 px-6 py-2 rounded-full text-sm font-medium transition-colors duration-300 ${viewMode === "3d" ? "text-white" : "text-black/60 hover:text-black"}`}
+                    >
+                      3D Galaxy
+                    </button>
+                    <button 
+                      onClick={() => setViewMode("2d")}
+                      className={`relative z-10 px-6 py-2 rounded-full text-sm font-medium transition-colors duration-300 ${viewMode === "2d" ? "text-white" : "text-black/60 hover:text-black"}`}
+                    >
+                      2D Grid
+                    </button>
+                    <div 
+                      className={`absolute inset-y-1 w-[calc(50%-4px)] bg-black rounded-full transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${viewMode === "3d" ? "left-1" : "translate-x-[calc(100%+8px)] left-1"}`}
+                    />
+                  </div>
+                </div>
+                {viewMode === "3d" ? (
+                  <RetrievalResult3D retrievalImage={retrievalImage as any}/>
+                ) : (
+                  <RetrievalResult retrievalImage={retrievalImage as any}/>
+                )}
               </motion.div>
             )}
           </div>

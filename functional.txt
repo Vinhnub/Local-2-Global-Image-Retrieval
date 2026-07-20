@@ -1,0 +1,16 @@
+- người dùng có tài khoản riêng
+    + Tài khoản là pro hoặc mặc định là không pro:
+        - Query được nhiều ảnh hơn trong 1 ngày
+        - Kết quả query được nhiều hơn và chất lượng hơn (set được k lớn hơn)
+- Có database (sử dụng sqlite):
+    + Lưu lại tài khoản người dùng 
+        - Lưu thời hạn pro của người dùng
+    + lưu lại những query của từng người dùng và kết quả của query đó
+    + Lưu lại đánh giá của người dùng sau mỗi lần query
+- Chức năng query:
+    + Thêm chức năng sau khi query cho người dùng đánh giá
+
+- Chức năng đăng kí, đăng nhập, đổi mật khẩu
+
+- Bảo mật:
+    + sử dụng JWT
